@@ -1,0 +1,23 @@
+spring:
+  # Local Config
+  config:
+    import:
+      - application-secret.yml
+    activate:
+      on-profile: local
+  # MySQL
+  datasource:
+    url: ${DB.LOCAL.URL}
+    username: ${DB.LOCAL.USERNAME}
+    password: ${DB.LOCAL.PASSWORD}
+    driver-class-name: ${DB.LOCAL.DRIVER_CLASS_NAME}
+
+  # JPA Config
+  jpa:
+    show-sql: true
+    database: mysql
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
