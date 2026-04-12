@@ -21,3 +21,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+swagger:
+  server-url: ${SWAGGER.LOCAL.SERVER_URL}
