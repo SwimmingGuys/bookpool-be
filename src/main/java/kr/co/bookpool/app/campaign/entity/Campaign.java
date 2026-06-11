@@ -1,0 +1,95 @@
+package kr.co.bookpool.app.campaign.entity;
+
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import kr.co.bookpool.common.entity.BaseTimeEntity;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@Entity
+@Table(
+	name = "campaign",
+	indexes = {
+		@Index(name = "idx_campaign_status_deadline", columnList = "status, deadline_at"),
+		@Index(name = "idx_campaign_category", columnList = "category"),
+		@Index(name = "idx_campaign_created_at", columnList = "created_at")
+	}
+)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Campaign extends BaseTimeEntity {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Column(nullable = false, length = 255)
+	private String title;
+
+	@Column(name = "publisher_name", nullable = false, length = 100)
+	private String publisherName;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, columnDefinition = "ENUM('IT','ECONOMY','NOVEL','ESSAY','HUMANITY','SCIENCE','ETC')")
+	private CampaignCategory category;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, columnDefinition = "ENUM('REVIEWER','BETA_READER')")
+	private CampaignType type;
+
+	@Column(name = "apply_url", nullable = false, length = 500)
+	private String applyUrl;
+
+	@Column(name = "image_url", length = 500)
+	private String imageUrl;
+
+	@Column(name = "deadline_at", nullable = false)
+	private LocalDateTime deadlineAt;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, columnDefinition = "ENUM('UPCOMING','OPEN','CLOSED') DEFAULT 'OPEN'")
+	private CampaignStatus status = CampaignStatus.OPEN;
+
+	private Campaign(
+		String title,
+		String publisherName,
+		CampaignCategory category,
+		CampaignType type,
+		String applyUrl,
+		String imageUrl,
+		LocalDateTime deadlineAt,
+		CampaignStatus status
+	) {
+		this.title = title;
+		this.publisherName = publisherName;
+		this.category = category;
+		this.type = type;
+		this.applyUrl = applyUrl;
+		this.imageUrl = imageUrl;
+		this.deadlineAt = deadlineAt;
+		this.status = status;
+	}
+
+	public static Campaign create(
+		String title,
+		String publisherName,
+		CampaignCategory category,
+		CampaignType type,
+		String applyUrl,
+		String imageUrl,
+		LocalDateTime deadlineAt,
+		CampaignStatus status
+	) {
+		return new Campaign(title, publisherName, category, type, applyUrl, imageUrl, deadlineAt, status);
+	}
+}
