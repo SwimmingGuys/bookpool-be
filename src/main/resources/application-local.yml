@@ -17,7 +17,7 @@ spring:
     show-sql: true
     database: mysql
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
     properties:
       hibernate:
         format_sql: true

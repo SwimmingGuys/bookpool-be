@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import kr.co.bookpool.common.entity.BaseTimeEntity;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +18,12 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "member")
+@Table(
+	name = "member",
+	uniqueConstraints = {
+		@UniqueConstraint(name = "uk_member_email", columnNames = "email")
+	}
+)
 @NoArgsConstructor(access = PROTECTED)
 public class Member extends BaseTimeEntity {
 
@@ -25,7 +31,7 @@ public class Member extends BaseTimeEntity {
 	@GeneratedValue(strategy = IDENTITY)
 	private Long id;
 
-	@Column(name = "email", nullable = false, unique = true)
+	@Column(name = "email", nullable = false)
 	private String email;
 
 	@Column(name = "nickname", nullable = false, length = 50)

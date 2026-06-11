@@ -4,6 +4,7 @@ import static kr.co.bookpool.common.exception.ErrorCode.*;
 
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,6 +34,23 @@ public class GlobalExceptionHandler {
 		return ResponseEntity
 			.status(errorCode.getStatus())
 			.body(ApiResult.error(errorCode, fieldErrors));
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<ApiResult<Void>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+		return DbConstraint.resolve(e.getMostSpecificCause().getMessage())
+			.map(errorCode -> { // 매칭 : 해당 상태코드(409 등)
+				log.warn("DataIntegrityViolationException mapped to {}: {}", errorCode.getCode(), e.getMessage());
+				return ResponseEntity
+					.status(errorCode.getStatus())
+					.body(ApiResult.error(errorCode));
+			})
+			.orElseGet(() -> { // 알 수 없는 위반 : error 로깅 + 500
+				log.error("Unhandled data integrity violation", e);
+				return ResponseEntity
+					.status(INTERNAL_SERVER_ERROR.getStatus())
+					.body(ApiResult.error(INTERNAL_SERVER_ERROR));
+			});
 	}
 
 	@ExceptionHandler(Exception.class)
