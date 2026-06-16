@@ -1,3 +1,7 @@
 spring:
   application:
     name: bookpool
+
+jwt:
+  secret: ${JWT.SECRET}
+  access-token-validity-ms: 3600000

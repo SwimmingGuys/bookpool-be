@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.bookpool.app.member.dto.request.SignUpRequest;
+import kr.co.bookpool.app.member.dto.response.MeResponse;
 import kr.co.bookpool.app.member.dto.response.SignUpResponse;
 import kr.co.bookpool.app.member.entity.Member;
 import kr.co.bookpool.app.member.repository.MemberRepository;
@@ -38,5 +39,12 @@ public class MemberService {
 		);
 
 		return SignUpResponse.from(member);
+	}
+
+	public MeResponse getMyInfo(Long memberId) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
+
+		return MeResponse.from(member);
 	}
 }

@@ -7,12 +7,23 @@ spring:
     driver-class-name: org.h2.Driver
 
   jpa:
-    show-sql: true
+    show-sql: false   # p6spy로 실제 쿼리를 출력하므로 중복 방지
     hibernate:
       ddl-auto: create-drop
     properties:
       hibernate:
         format_sql: true
 
+# p6spy: 바인딩된 실제 쿼리 로깅 (테스트만으로도 쿼리 확인 가능)
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
+      logging: slf4j
+
 swagger:
   server-url: http://localhost:8080
+
+jwt:
+  secret: bookpool-test-secret-key-for-junit-only-0123456789-abcdefghij
+  access-token-validity-ms: 3600000

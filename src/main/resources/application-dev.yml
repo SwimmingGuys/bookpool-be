@@ -14,10 +14,17 @@ spring:
 
   # JPA Config
   jpa:
-    show-sql: true
+    show-sql: false   # p6spy로 실제 쿼리를 출력하므로 중복 방지
     database: mysql
     hibernate:
       ddl-auto: none
     properties:
       hibernate:
         format_sql: true
+
+# p6spy: 바인딩된 실제 쿼리 로깅
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
+      logging: slf4j

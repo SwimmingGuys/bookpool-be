@@ -2,6 +2,7 @@ package kr.co.bookpool.common.config;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.*;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,16 +10,28 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import kr.co.bookpool.common.security.JwtAuthenticationEntryPoint;
+import kr.co.bookpool.common.security.JwtAuthenticationFilter;
+import kr.co.bookpool.common.security.JwtProperties;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
+@RequiredArgsConstructor
+@EnableConfigurationProperties(JwtProperties.class)
 public class SecurityConfig {
 
 	private static final String[] PUBLIC_ENDPOINTS = {
 		"/api/signup",
+		"/api/login",
 		"/swagger-ui/**",
 		"/v3/api-docs/**",
 		"/actuator/health"
 	};
+
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) {
@@ -35,6 +48,10 @@ public class SecurityConfig {
 				.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
 				.anyRequest().authenticated()
 			)
+			// 미인증 요청은 ApiResult 포맷의 401로 응답
+			.exceptionHandling(handler -> handler.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+			// JWT 인증 필터 등록
+			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.build();
 	}
 

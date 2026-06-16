@@ -6,8 +6,10 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.co.bookpool.app.member.dto.request.SignUpRequest;
+import kr.co.bookpool.app.member.dto.response.MeResponse;
 import kr.co.bookpool.app.member.dto.response.SignUpResponse;
 import kr.co.bookpool.common.response.ApiResult;
 
@@ -54,4 +56,29 @@ public interface MemberControllerDocs {
 				}""")))
 	})
 	ApiResult<SignUpResponse> signUp(SignUpRequest request);
+
+	@Operation(
+		summary = "내 정보 조회",
+		description = "Access 토큰으로 인증된 회원의 정보를 조회합니다.",
+		security = @SecurityRequirement(name = "bearerAuth"))
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200", description = "조회 성공",
+			content = @Content(examples = @ExampleObject(value = """
+				{
+				  "success": true,
+				  "code": "SUCCESS",
+				  "message": "요청에 성공했습니다.",
+				  "data": { "id": 1, "email": "test@bookpool.kr", "nickname": "북풀러", "role": "USER" }
+				}"""))),
+		@ApiResponse(
+			responseCode = "401", description = "인증 실패 (토큰 없음/유효하지 않음)",
+			content = @Content(examples = @ExampleObject(value = """
+				{
+				  "success": false,
+				  "code": "A002",
+				  "message": "유효하지 않은 인증 정보입니다."
+				}""")))
+	})
+	ApiResult<MeResponse> getMyInfo(Long memberId);
 }
