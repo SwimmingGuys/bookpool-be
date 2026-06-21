@@ -33,6 +33,20 @@ jobs:
           echo "image_name=${IMAGE_NAME_LC}" >> "$GITHUB_OUTPUT"
           echo "image_tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Gradle (캐시 자동 관리)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build JAR (skip tests — CI.yml 에서 이미 실행)
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon clean bootJar -x test
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
