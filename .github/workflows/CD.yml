@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   packages: write
 
 env:
@@ -48,32 +48,88 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  update-manifest:
-    name: Bump Image Tag in Manifest
+  deploy:
+    name: Deploy to EC2
     runs-on: ubuntu-latest
     needs: build-and-push
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Copy deploy files to EC2
+        uses: appleboy/scp-action@v0.1.7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "deploy/docker-compose.yml,deploy/Caddyfile"
+          target: "~/bookpool"
+          strip_components: 1
+          overwrite: true
 
-      - name: Update kustomization image tag
-        working-directory: k8s/overlays/prod
-        run: |
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-          TAG="${{ needs.build-and-push.outputs.image_tag }}"
-          sed -i -E "s|(newTag:).*|\1 ${TAG}|" kustomization.yaml
-          echo "--- updated kustomization.yaml ---"
-          cat kustomization.yaml
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+          REGISTRY: ${{ env.REGISTRY }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
+          GH_ACTOR: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: ENV_FILE,REGISTRY,IMAGE_NAME,IMAGE_TAG,GH_ACTOR,GH_TOKEN
+          script: |
+            set -e
+            mkdir -p ~/bookpool
+            cd ~/bookpool
 
-      - name: Commit & push
+            # 1) GHCR 인증 (private 패키지면 필수)
+            echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
+
+            # 2) ENV_FILE secret 을 .env 로 기록 (앱 + MySQL 둘 다 사용)
+            #    이전 파일이 있어도 덮어쓰기. 권한은 owner 만 읽기.
+            umask 077
+            printf '%s\n' "$ENV_FILE" > .env
+            chmod 600 .env
+
+            # 3) 이번 배포의 이미지 태그를 .env.deploy 로 기록
+            cat > .env.deploy <<EOF
+            REGISTRY=$REGISTRY
+            IMAGE_NAME=$IMAGE_NAME
+            IMAGE_TAG=$IMAGE_TAG
+            EOF
+            chmod 600 .env.deploy
+
+            # 4) compose 실행 — 두 env 파일을 동시에 인식시키기 위해
+            #    .env.deploy 의 변수를 export 한 뒤 (compose 변수치환에 사용)
+            #    .env 는 services.app.env_file 로 자동 로드됨
+            set -a
+            source .env.deploy
+            set +a
+
+            docker compose pull
+            docker compose up -d
+
+            # 5) 헬스체크 대기 (최대 90초 — MySQL 초기화 포함)
+            echo "Waiting for app to be healthy..."
+            for i in $(seq 1 45); do
+              status=$(docker inspect -f '{{.State.Health.Status}}' bookpool-app 2>/dev/null || echo "starting")
+              if [ "$status" = "healthy" ]; then
+                echo "App is healthy."
+                break
+              fi
+              sleep 2
+            done
+
+            # 6) 정리
+            docker image prune -f
+            docker logout ghcr.io || true
+
+      - name: Verify HTTPS
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add k8s/overlays/prod/kustomization.yaml
-          if git diff --cached --quiet; then
-            echo "no changes"; exit 0
-          fi
-          git commit -m "chore(cd): bump image to ${{ needs.build-and-push.outputs.image_tag }} [skip ci]"
-          git push
+          # DNS / Caddy / Let's Encrypt 정상 동작 확인
+          # 첫 배포 시 인증서 발급에 시간 걸릴 수 있어 실패해도 워크플로우는 통과
+          curl -fsSI --max-time 15 https://${{ secrets.EC2_HOST }} || echo "HTTPS not ready yet (first-time cert issuance can take a minute)"
