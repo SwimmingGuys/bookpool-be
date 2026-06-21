@@ -41,3 +41,6 @@ out/
 application-secret.yml
 .gitmessage.txt
 
+### Deploy ###
+deploy/.env
+deploy/.env
