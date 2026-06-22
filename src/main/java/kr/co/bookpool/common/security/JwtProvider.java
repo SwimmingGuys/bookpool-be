@@ -8,7 +8,6 @@ import javax.crypto.SecretKey;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import kr.co.bookpool.app.member.entity.Role;
@@ -39,28 +38,19 @@ public class JwtProvider {
 			.compact();
 	}
 
-	public boolean validate(String token) {
-		try {
-			parseClaims(token);
-			return true;
-		} catch (JwtException | IllegalArgumentException e) {
-			return false;
-		}
-	}
-
-	public Long getMemberId(String token) {
-		return Long.valueOf(parseClaims(token).getSubject());
-	}
-
-	public Role getRole(String token) {
-		return Role.valueOf(parseClaims(token).get(ROLE_CLAIM, String.class));
-	}
-
-	private Claims parseClaims(String token) {
+	public Claims parse(String token) {
 		return Jwts.parser()
 			.verifyWith(key)
 			.build()
 			.parseSignedClaims(token)
 			.getPayload();
+	}
+
+	public Long getMemberId(Claims claims) {
+		return Long.valueOf(claims.getSubject());
+	}
+
+	public Role getRole(Claims claims) {
+		return Role.valueOf(claims.get(ROLE_CLAIM, String.class));
 	}
 }
