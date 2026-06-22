@@ -1,0 +1,10 @@
+.git
+.github
+.gradle
+.idea
+build
+out
+*.iml
+*.md
+src/main/resources/application-secret.yml
+src/main/resources/application-local.yml
