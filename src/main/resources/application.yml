@@ -1,7 +1,22 @@
 spring:
   application:
     name: bookpool
+  data:
+    redis:
+      host: ${REDIS.HOST:localhost}
+      port: ${REDIS.PORT:6379}
 
 jwt:
   secret: ${JWT.SECRET}
-  access-token-validity-ms: 3600000
+  access-token-validity-ms: 3600000        # 1시간
+  refresh-token-validity-ms: 1209600000    # 14일
+
+app:
+  # 쿠키를 주고받으므로 와일드카드 불가. 허용할 프론트 오리진을 콤마로 나열.
+  cors:
+    allowed-origins: ${CORS.ALLOWED_ORIGINS:http://localhost:3000}
+  auth:
+    # 운영(https, 교차 사이트) 기본값: Secure + SameSite=None. 로컬은 프로필에서 override.
+    cookie:
+      secure: ${COOKIE.SECURE:true}
+      same-site: ${COOKIE.SAME_SITE:None}

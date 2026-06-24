@@ -31,3 +31,10 @@ decorator:
 
 swagger:
   server-url: ${SWAGGER.LOCAL.SERVER_URL}
+
+# 로컬은 http이고 localhost:3000↔:8080은 same-site이므로 Secure 불필요 + SameSite=Lax로 동작
+app:
+  auth:
+    cookie:
+      secure: false
+      same-site: Lax
