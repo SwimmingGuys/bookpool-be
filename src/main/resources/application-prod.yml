@@ -15,6 +15,20 @@ spring:
     properties:
       hibernate:
         format_sql: false
+  # Redis: 컨테이너/외부 호스트를 환경변수로 주입 (기본값 없음 → 미설정 시 즉시 실패)
+  data:
+    redis:
+      host: ${REDIS.HOST}
+      port: ${REDIS.PORT:6379}
+
+# 운영 서버: bookpool.co.kr + /api (same-origin). CORS는 실질적으로 사용되지 않지만 방어적으로 명시.
+app:
+  cors:
+    allowed-origins: https://bookpool.co.kr
+  auth:
+    cookie:
+      secure: true
+      same-site: Lax
 
 management:
   endpoints:

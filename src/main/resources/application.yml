@@ -6,17 +6,26 @@ spring:
       host: ${REDIS.HOST:localhost}
       port: ${REDIS.PORT:6379}
 
+# nginx/Caddy 등 리버스 프록시가 TLS를 종료할 때, 원 요청의 scheme/host(X-Forwarded-*)를
+# 앱이 인식하도록 한다. (request.isSecure(), 리다이렉트 URL, Swagger 서버 URL 등이 https로 정확히 동작)
+# 로컬은 프록시가 없어 forwarded 헤더가 없으므로 영향 없음.
+server:
+  forward-headers-strategy: framework
+
 jwt:
   secret: ${JWT.SECRET}
   access-token-validity-ms: 3600000        # 1시간
   refresh-token-validity-ms: 1209600000    # 14일
 
 app:
-  # 쿠키를 주고받으므로 와일드카드 불가. 허용할 프론트 오리진을 콤마로 나열.
+  # 운영/개발 서버는 same-origin(예: bookpool.co.kr + /api)이라 CORS가 사실상 불필요하지만,
+  # 로컬 개발(localhost:3000 → :8080)은 포트가 달라 교차 오리진이므로 허용 목록이 필요하다.
+  # 쿠키(자격 증명)를 주고받으므로 와일드카드 불가 → 오리진을 콤마로 명시.
   cors:
     allowed-origins: ${CORS.ALLOWED_ORIGINS:http://localhost:3000}
   auth:
-    # 운영(https, 교차 사이트) 기본값: Secure + SameSite=None. 로컬은 프로필에서 override.
+    # same-origin/same-site 구성이라 SameSite=Lax로 충분(None보다 안전, CSRF 방어에 유리).
+    # Secure는 https 전제. 로컬(http)은 프로필에서 false로 override.
     cookie:
       secure: ${COOKIE.SECURE:true}
-      same-site: ${COOKIE.SAME_SITE:None}
+      same-site: ${COOKIE.SAME_SITE:Lax}
