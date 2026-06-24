@@ -19,13 +19,17 @@ jwt:
 
 app:
   # 운영/개발 서버는 same-origin(예: bookpool.co.kr + /api)이라 CORS가 사실상 불필요하지만,
-  # 로컬 개발(localhost:3000 → :8080)은 포트가 달라 교차 오리진이므로 허용 목록이 필요하다.
+  # 로컬 개발(localhost:5173 → :8080)은 포트가 달라 교차 오리진이므로 허용 목록이 필요하다.
   # 쿠키(자격 증명)를 주고받으므로 와일드카드 불가 → 오리진을 콤마로 명시.
   cors:
-    allowed-origins: ${CORS.ALLOWED_ORIGINS:http://localhost:3000}
+    allowed-origins: ${CORS.ALLOWED_ORIGINS:http://localhost:5173}
   auth:
     # same-origin/same-site 구성이라 SameSite=Lax로 충분(None보다 안전, CSRF 방어에 유리).
     # Secure는 https 전제. 로컬(http)은 프로필에서 false로 override.
     cookie:
       secure: ${COOKIE.SECURE:true}
       same-site: ${COOKIE.SAME_SITE:Lax}
+  # 회원가입 이메일 인증: 코드 유효 5분, 인증 완료 상태 유효 30분
+  email-verification:
+    code-ttl: 5m
+    verified-ttl: 30m

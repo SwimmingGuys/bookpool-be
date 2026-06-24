@@ -2,7 +2,10 @@ spring:
   # Dev Config
   config:
     import:
-      - application-secret.yml
+      # 로컬/IDE 실행 시: 클래스패스(src/main/resources)의 secret 파일
+      - optional:classpath:application-secret.yml
+      # Docker 실행 시: 컨테이너에 마운트한 secret 파일 (이미지엔 굽지 않음)
+      - optional:file:/app/config/application-secret.yml
     activate:
       on-profile: dev
   # MySQL
@@ -22,6 +25,19 @@ spring:
       hibernate:
         format_sql: true
 
+  # SMTP: 이메일 인증 코드 발송 (자격증명은 secret/환경변수로 주입)
+  mail:
+    host: ${MAIL.HOST:smtp.gmail.com}
+    port: ${MAIL.PORT:587}
+    username: ${MAIL.USERNAME}
+    password: ${MAIL.PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 # p6spy: 바인딩된 실제 쿼리 로깅
 decorator:
   datasource:
@@ -37,3 +53,5 @@ app:
     cookie:
       secure: true        # dev가 https가 아닌 http면 false로 변경 (Secure 쿠키는 https에서만 전송됨)
       same-site: Lax
+  mail:
+    from: ${MAIL.FROM:noreply@bookpool.co.kr}

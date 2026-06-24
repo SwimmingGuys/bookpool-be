@@ -19,6 +19,8 @@ public enum ErrorCode {
 	// Member
 	DUPLICATE_EMAIL(CONFLICT, "M001", "이미 사용 중인 이메일입니다."),
 	MEMBER_NOT_FOUND(NOT_FOUND, "M002", "회원을 찾을 수 없습니다."),
+	EMAIL_NOT_VERIFIED(BAD_REQUEST, "M003", "이메일 인증이 완료되지 않았습니다."),
+	INVALID_VERIFICATION_CODE(BAD_REQUEST, "M004", "인증 코드가 올바르지 않거나 만료되었습니다."),
 
 	// Auth
 	LOGIN_FAILED(UNAUTHORIZED, "A001", "이메일 또는 비밀번호가 올바르지 않습니다."),

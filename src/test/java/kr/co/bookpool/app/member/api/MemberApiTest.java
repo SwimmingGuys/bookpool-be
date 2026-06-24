@@ -23,9 +23,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestClient;
 
+import java.time.Duration;
+
 import kr.co.bookpool.app.member.dto.request.SignUpRequest;
 import kr.co.bookpool.app.member.dto.response.SignUpResponse;
 import kr.co.bookpool.app.member.repository.MemberRepository;
+import kr.co.bookpool.app.member.verification.EmailVerificationStore;
 import kr.co.bookpool.common.response.ApiResult;
 import kr.co.bookpool.common.response.FieldError;
 
@@ -38,6 +41,9 @@ class MemberApiTest {
 
 	@Autowired
 	private MemberRepository memberRepository;
+
+	@Autowired
+	private EmailVerificationStore emailVerificationStore;
 
 	private RestClient restClient;
 
@@ -55,7 +61,8 @@ class MemberApiTest {
 	@Test
 	@DisplayName("회원가입에 성공하면 201과 가입 정보를 반환한다")
 	void signUp_success() {
-		// given
+		// given - 이메일 인증을 마친 상태
+		verifyEmail("test@bookpool.kr");
 		SignUpRequest request = new SignUpRequest("test@bookpool.kr", "북풀러", "password1234", true);
 
 		// when
@@ -81,6 +88,7 @@ class MemberApiTest {
 	@DisplayName("이미 가입된 이메일로 가입하면 409와 에러 코드를 반환한다")
 	void signUp_duplicateEmail() {
 		// given
+		verifyEmail("dup@bookpool.kr");
 		SignUpRequest request = new SignUpRequest("dup@bookpool.kr", "닉네임", "password1234", true);
 		signUp(request); // 최초 가입
 
@@ -129,6 +137,7 @@ class MemberApiTest {
 	@DisplayName("동일 이메일로 동시에 가입을 시도하면 한 건만 성공하고 나머지는 409가 된다(500이 아님)")
 	void signUp_concurrentSameEmail() throws InterruptedException {
 		// given
+		verifyEmail("race@bookpool.kr");
 		int threadCount = 16;
 		SignUpRequest request = new SignUpRequest("race@bookpool.kr", "닉네임", "password1234", true);
 
@@ -189,5 +198,10 @@ class MemberApiTest {
 			.body(request)
 			.retrieve()
 			.toBodilessEntity();
+	}
+
+	/** 회원가입 전제 조건인 '이메일 인증 완료' 상태를 만들어 둔다. */
+	private void verifyEmail(String email) {
+		emailVerificationStore.markVerified(email, Duration.ofMinutes(30));
 	}
 }

@@ -20,6 +20,18 @@ spring:
     redis:
       host: ${REDIS.HOST}
       port: ${REDIS.PORT:6379}
+  # SMTP: 이메일 인증 코드 발송 (자격증명은 환경변수로 주입)
+  mail:
+    host: ${MAIL.HOST:smtp.gmail.com}
+    port: ${MAIL.PORT:587}
+    username: ${MAIL.USERNAME}
+    password: ${MAIL.PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 # 운영 서버: bookpool.co.kr + /api (same-origin). CORS는 실질적으로 사용되지 않지만 방어적으로 명시.
 app:
@@ -29,6 +41,8 @@ app:
     cookie:
       secure: true
       same-site: Lax
+  mail:
+    from: ${MAIL.FROM:noreply@bookpool.co.kr}
 
 management:
   endpoints:

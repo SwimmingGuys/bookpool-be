@@ -17,6 +17,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import kr.co.bookpool.app.member.verification.EmailVerificationProperties;
 import kr.co.bookpool.common.security.CookieProperties;
 import kr.co.bookpool.common.security.JwtAuthenticationEntryPoint;
 import kr.co.bookpool.common.security.JwtAuthenticationFilter;
@@ -25,11 +26,15 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties({JwtProperties.class, CookieProperties.class, CorsProperties.class})
+@EnableConfigurationProperties({
+	JwtProperties.class, CookieProperties.class, CorsProperties.class, EmailVerificationProperties.class
+})
 public class SecurityConfig {
 
 	private static final String[] PUBLIC_ENDPOINTS = {
 		"/api/signup",
+		"/api/signup/email/code",
+		"/api/signup/email/verify",
 		"/api/login",
 		"/api/reissue",
 		"/api/logout",

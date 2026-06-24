@@ -18,11 +18,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestClient;
 
+import java.time.Duration;
+
 import kr.co.bookpool.app.auth.dto.request.LoginRequest;
 import kr.co.bookpool.app.auth.dto.response.LoginResponse;
 import kr.co.bookpool.app.member.dto.request.SignUpRequest;
 import kr.co.bookpool.app.member.dto.response.MeResponse;
 import kr.co.bookpool.app.member.repository.MemberRepository;
+import kr.co.bookpool.app.member.verification.EmailVerificationStore;
 import kr.co.bookpool.common.response.ApiResult;
 import kr.co.bookpool.common.response.FieldError;
 
@@ -39,6 +42,9 @@ class AuthApiTest {
 	@Autowired
 	private MemberRepository memberRepository;
 
+	@Autowired
+	private EmailVerificationStore emailVerificationStore;
+
 	private RestClient restClient;
 
 	@BeforeEach
@@ -51,6 +57,8 @@ class AuthApiTest {
 			})
 			.build();
 
+		// 회원가입은 이메일 인증을 전제로 하므로 인증 완료 상태를 만들어 둔다
+		emailVerificationStore.markVerified(EMAIL, Duration.ofMinutes(30));
 		signUp(new SignUpRequest(EMAIL, "북풀러", PASSWORD, true));
 	}
 

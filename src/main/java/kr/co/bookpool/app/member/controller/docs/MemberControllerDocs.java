@@ -16,7 +16,9 @@ import kr.co.bookpool.common.response.ApiResult;
 @Tag(name = "Member", description = "회원 API")
 public interface MemberControllerDocs {
 
-	@Operation(summary = "회원가입", description = "이메일/닉네임/비밀번호로 신규 회원을 등록합니다.")
+	@Operation(summary = "회원가입",
+		description = "이메일/닉네임/비밀번호로 신규 회원을 등록합니다. "
+			+ "사전에 이메일 인증(코드 발송 → 코드 확인)을 완료한 이메일만 가입할 수 있습니다.")
 	@RequestBody(content = @Content(examples = @ExampleObject(value = """
 		{
 		  "email": "test@bookpool.kr",
