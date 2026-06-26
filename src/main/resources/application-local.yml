@@ -17,10 +17,24 @@ spring:
     show-sql: false   # p6spy로 실제 쿼리를 출력하므로 중복 방지
     database: mysql
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: true
+
+  # SMTP: 이메일 인증 코드 발송 (자격증명은 secret/환경변수로 주입)
+  # 실제 발송하려면 app.mail.smtp.enabled=true + MAIL.USERNAME/PASSWORD(Gmail 앱 비밀번호) 필요
+  mail:
+    host: ${MAIL.HOST:smtp.gmail.com}
+    port: ${MAIL.PORT:587}
+    username: ${MAIL.USERNAME:}
+    password: ${MAIL.PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 # p6spy: 바인딩된 실제 쿼리 로깅
 decorator:
@@ -38,3 +52,9 @@ app:
     cookie:
       secure: false
       same-site: Lax
+  # 실제 이메일 발송 토글. 기본 false → 코드가 로그로만 출력(LogEmailSender).
+  # true로 켜면 위 spring.mail.* 자격증명으로 실제 SMTP 발송(SmtpEmailSender).
+  mail:
+    smtp:
+      enabled: ${MAIL.SMTP_ENABLED:false}
+    from: ${MAIL.FROM:noreply@bookpool.co.kr}

@@ -54,4 +54,6 @@ app:
       secure: true        # dev가 https가 아닌 http면 false로 변경 (Secure 쿠키는 https에서만 전송됨)
       same-site: Lax
   mail:
+    smtp:
+      enabled: true
     from: ${MAIL.FROM:noreply@bookpool.co.kr}

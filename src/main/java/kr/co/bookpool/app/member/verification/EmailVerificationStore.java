@@ -18,4 +18,6 @@ public interface EmailVerificationStore {
 	void markVerified(String email, Duration ttl);
 
 	boolean isVerified(String email);
+
+	void deleteVerified(String email);
 }

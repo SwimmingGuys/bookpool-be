@@ -42,6 +42,8 @@ app:
       secure: true
       same-site: Lax
   mail:
+    smtp:
+      enabled: true
     from: ${MAIL.FROM:noreply@bookpool.co.kr}
 
 management:

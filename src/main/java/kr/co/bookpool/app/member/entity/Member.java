@@ -71,5 +71,9 @@ public class Member extends BaseTimeEntity {
 			.isActive(true)
 			.build();
 	}
+
+	public void changePassword(String encodedPassword) {
+		this.password = encodedPassword;
+	}
 }
 
