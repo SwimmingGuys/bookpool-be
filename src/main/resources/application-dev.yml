@@ -2,7 +2,10 @@ spring:
   # Dev Config
   config:
     import:
-      - application-secret.yml
+      # 로컬/IDE 실행 시: 클래스패스(src/main/resources)의 secret 파일
+      - optional:classpath:application-secret.yml
+      # Docker 실행 시: 컨테이너에 마운트한 secret 파일 (이미지엔 굽지 않음)
+      - optional:file:/app/config/application-secret.yml
     activate:
       on-profile: dev
   # MySQL
@@ -14,10 +17,41 @@ spring:
 
   # JPA Config
   jpa:
-    show-sql: true
+    show-sql: false   # p6spy로 실제 쿼리를 출력하므로 중복 방지
     database: mysql
     hibernate:
       ddl-auto: none
     properties:
       hibernate:
         format_sql: true
+
+  # SMTP: 이메일 인증 코드 발송 (자격증명은 secret/환경변수로 주입)
+  mail:
+    host: ${MAIL.HOST:smtp.gmail.com}
+    port: ${MAIL.PORT:587}
+    username: ${MAIL.USERNAME}
+    password: ${MAIL.PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# p6spy: 바인딩된 실제 쿼리 로깅
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
+      logging: slf4j
+
+# 개발 서버: dev.bookpool.co.kr + /api (same-origin). Redis host는 base의 ${REDIS.HOST}로 주입.
+app:
+  cors:
+    allowed-origins: https://dev.bookpool.co.kr
+  auth:
+    cookie:
+      secure: true        # dev가 https가 아닌 http면 false로 변경 (Secure 쿠키는 https에서만 전송됨)
+      same-site: Lax
+  mail:
+    from: ${MAIL.FROM:noreply@bookpool.co.kr}

@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.bookpool.app.member.dto.request.SignUpRequest;
+import kr.co.bookpool.app.member.dto.response.MeResponse;
 import kr.co.bookpool.app.member.dto.response.SignUpResponse;
 import kr.co.bookpool.app.member.entity.Member;
 import kr.co.bookpool.app.member.repository.MemberRepository;
+import kr.co.bookpool.app.member.verification.EmailVerificationStore;
 import kr.co.bookpool.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 
@@ -20,9 +22,15 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final EmailVerificationStore emailVerificationStore;
 
 	@Transactional
 	public SignUpResponse signUp(SignUpRequest request) {
+		// 이메일 인증을 거친 이메일만 가입을 허용한다(인증 상태는 TTL이 지나면 자동 만료).
+		if (!emailVerificationStore.isVerified(request.email())) {
+			throw new BusinessException(EMAIL_NOT_VERIFIED);
+		}
+
 		if (memberRepository.existsByEmail(request.email())) {
 			throw new BusinessException(DUPLICATE_EMAIL);
 		}
@@ -38,5 +46,12 @@ public class MemberService {
 		);
 
 		return SignUpResponse.from(member);
+	}
+
+	public MeResponse getMyInfo(Long memberId) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
+
+		return MeResponse.from(member);
 	}
 }
