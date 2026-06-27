@@ -18,7 +18,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum DbConstraint {
 
-	UK_MEMBER_EMAIL("uk_member_email", DUPLICATE_EMAIL);
+	UK_MEMBER_EMAIL("uk_member_email", DUPLICATE_EMAIL),
+	UK_BOOKMARK_MEMBER_CAMPAIGN("uk_bookmark_member_campaign", BOOKMARK_ALREADY_EXISTS);
 
 	private final String constraintName;
 	private final ErrorCode errorCode;

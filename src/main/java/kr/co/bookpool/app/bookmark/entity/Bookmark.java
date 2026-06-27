@@ -42,4 +42,13 @@ public class Bookmark extends BaseTimeEntity {
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "campaign_id", nullable = false)
 	private Campaign campaign;
+
+	private Bookmark(Member member, Campaign campaign) {
+		this.member = member;
+		this.campaign = campaign;
+	}
+
+	public static Bookmark create(Member member, Campaign campaign) {
+		return new Bookmark(member, campaign);
+	}
 }
