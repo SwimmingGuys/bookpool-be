@@ -31,7 +31,11 @@ public enum ErrorCode {
 	CAMPAIGN_NOT_FOUND(NOT_FOUND, "CP001", "캠페인을 찾을 수 없습니다."),
 
 	// Notice
-	NOTICE_NOT_FOUND(NOT_FOUND, "N001", "공지사항을 찾을 수 없습니다.");
+	NOTICE_NOT_FOUND(NOT_FOUND, "N001", "공지사항을 찾을 수 없습니다."),
+
+	// Bookmark
+	BOOKMARK_ALREADY_EXISTS(CONFLICT, "B001", "이미 즐겨찾기한 공고입니다."),
+	BOOKMARK_NOT_FOUND(NOT_FOUND, "B002", "즐겨찾기를 찾을 수 없습니다.");
 
 	private final HttpStatus status;
 	private final String code;
