@@ -31,7 +31,7 @@ import kr.co.bookpool.app.auth.dto.response.LoginResponse;
 import kr.co.bookpool.app.bookmark.dto.request.BookmarkRequest;
 import kr.co.bookpool.app.bookmark.repository.BookmarkRepository;
 import kr.co.bookpool.app.campaign.dto.response.CampaignResponse;
-import kr.co.bookpool.app.campaign.dto.response.PageResponse;
+import kr.co.bookpool.common.response.PageResponse;
 import kr.co.bookpool.app.campaign.entity.Campaign;
 import kr.co.bookpool.app.campaign.entity.CampaignCategory;
 import kr.co.bookpool.app.campaign.entity.CampaignStatus;

@@ -27,7 +27,7 @@ import kr.co.bookpool.app.auth.dto.response.LoginResponse;
 import kr.co.bookpool.app.campaign.dto.request.CampaignCreateRequest;
 import kr.co.bookpool.app.campaign.dto.request.CampaignUpdateRequest;
 import kr.co.bookpool.app.campaign.dto.response.CampaignResponse;
-import kr.co.bookpool.app.campaign.dto.response.PageResponse;
+import kr.co.bookpool.common.response.PageResponse;
 import kr.co.bookpool.app.campaign.entity.CampaignCategory;
 import kr.co.bookpool.app.campaign.entity.CampaignStatus;
 import kr.co.bookpool.app.campaign.entity.CampaignType;
