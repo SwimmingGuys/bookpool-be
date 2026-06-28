@@ -1,0 +1,7 @@
+# 실제 시크릿/산출물은 커밋하지 않는다 (.example 만 커밋)
+.env
+application-secret.yml
+.htpasswd
+dist/
+certs/
+certbot-www/

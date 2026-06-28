@@ -33,6 +33,13 @@ spring:
           starttls:
             enable: true
 
+# 운영에서는 Swagger 미노출: springdoc UI/문서 엔드포인트를 끈다 (SwaggerConfig 도 @Profile("!prod")).
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 # 운영 서버: bookpool.co.kr + /api (same-origin). CORS는 실질적으로 사용되지 않지만 방어적으로 명시.
 app:
   cors:
