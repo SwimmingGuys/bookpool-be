@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.co.bookpool.app.campaign.dto.response.PageResponse;
+import kr.co.bookpool.common.response.PageResponse;
 import kr.co.bookpool.app.notice.controller.docs.NoticeControllerDocs;
 import kr.co.bookpool.app.notice.dto.response.NoticeResponse;
 import kr.co.bookpool.app.notice.entity.NoticeCategory;

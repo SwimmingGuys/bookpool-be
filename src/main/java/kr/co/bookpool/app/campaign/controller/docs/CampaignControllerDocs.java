@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.co.bookpool.app.campaign.dto.request.DeadlineFilter;
 import kr.co.bookpool.app.campaign.dto.request.SortKey;
 import kr.co.bookpool.app.campaign.dto.response.CampaignResponse;
-import kr.co.bookpool.app.campaign.dto.response.PageResponse;
+import kr.co.bookpool.common.response.PageResponse;
 import kr.co.bookpool.app.campaign.entity.CampaignCategory;
 import kr.co.bookpool.app.campaign.entity.CampaignType;
 import kr.co.bookpool.common.response.ApiResult;

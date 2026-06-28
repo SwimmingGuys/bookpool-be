@@ -7,7 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.co.bookpool.app.campaign.dto.response.PageResponse;
+import kr.co.bookpool.common.response.PageResponse;
 import kr.co.bookpool.app.notice.dto.response.NoticeResponse;
 import kr.co.bookpool.app.notice.entity.Notice;
 import kr.co.bookpool.app.notice.entity.NoticeCategory;
