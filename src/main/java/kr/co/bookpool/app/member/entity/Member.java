@@ -71,5 +71,16 @@ public class Member extends BaseTimeEntity {
 			.isActive(true)
 			.build();
 	}
+
+	public static Member createAdmin(String email, String nickname, String encodedPassword) {
+		return Member.builder()
+			.email(email)
+			.nickname(nickname)
+			.password(encodedPassword)
+			.role(Role.ADMIN)
+			.emailSubscribed(false)
+			.isActive(true)
+			.build();
+	}
 }
 
