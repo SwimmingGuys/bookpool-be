@@ -40,6 +40,7 @@ public class SecurityConfig {
 		"/api/login",
 		"/api/reissue",
 		"/api/logout",
+		"/api/password/**",
 		"/api/notices/**",
 		"/api/campaigns/**",
 		"/swagger-ui/**",
