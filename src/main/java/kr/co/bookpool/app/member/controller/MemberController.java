@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import kr.co.bookpool.app.member.controller.docs.MemberControllerDocs;
-import kr.co.bookpool.app.member.dto.request.ChangePasswordRequest;
 import kr.co.bookpool.app.member.dto.request.SignUpRequest;
 import kr.co.bookpool.app.member.dto.request.UpdateProfileRequest;
 import kr.co.bookpool.app.member.dto.response.MeResponse;
@@ -49,16 +48,5 @@ public class MemberController implements MemberControllerDocs {
 		@Valid @RequestBody UpdateProfileRequest request
 	) {
 		return ApiResult.success(memberService.updateProfile(memberId, request));
-	}
-
-	@Override
-	@PatchMapping("/api/me/password")
-	@ResponseStatus(OK)
-	public ApiResult<Void> changePassword(
-		@AuthenticationPrincipal Long memberId,
-		@Valid @RequestBody ChangePasswordRequest request
-	) {
-		memberService.changePassword(memberId, request);
-		return ApiResult.<Void>success(null);
 	}
 }
