@@ -45,4 +45,9 @@ public class InMemoryEmailVerificationStore implements EmailVerificationStore {
 	public boolean isVerified(String email) {
 		return verified.contains(email);
 	}
+
+	@Override
+	public void deleteVerified(String email) {
+		verified.remove(email);
+	}
 }

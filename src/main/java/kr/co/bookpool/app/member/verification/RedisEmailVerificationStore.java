@@ -50,6 +50,11 @@ public class RedisEmailVerificationStore implements EmailVerificationStore {
 		return VERIFIED_VALUE.equals(redisTemplate.opsForValue().get(verifiedKey(email)));
 	}
 
+	@Override
+	public void deleteVerified(String email) {
+		redisTemplate.delete(verifiedKey(email));
+	}
+
 	private String codeKey(String email) {
 		return CODE_PREFIX + email;
 	}
