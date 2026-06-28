@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.co.bookpool.app.campaign.dto.request.CampaignCreateRequest;
 import kr.co.bookpool.app.campaign.dto.request.CampaignUpdateRequest;
 import kr.co.bookpool.app.campaign.dto.response.CampaignResponse;
-import kr.co.bookpool.app.campaign.dto.response.PageResponse;
+import kr.co.bookpool.common.response.PageResponse;
 import kr.co.bookpool.common.response.ApiResult;
 
 @Tag(name = "Admin Campaign", description = "백오피스 캠페인 관리 API (ROLE_ADMIN 전용)")

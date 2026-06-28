@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import kr.co.bookpool.app.bookmark.entity.Bookmark;
 import kr.co.bookpool.app.bookmark.repository.BookmarkRepository;
 import kr.co.bookpool.app.campaign.dto.response.CampaignResponse;
-import kr.co.bookpool.app.campaign.dto.response.PageResponse;
+import kr.co.bookpool.common.response.PageResponse;
 import kr.co.bookpool.app.campaign.entity.Campaign;
 import kr.co.bookpool.app.campaign.repository.CampaignRepository;
 import kr.co.bookpool.app.member.entity.Member;

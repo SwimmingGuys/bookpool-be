@@ -20,7 +20,7 @@ import kr.co.bookpool.app.bookmark.controller.docs.BookmarkControllerDocs;
 import kr.co.bookpool.app.bookmark.dto.request.BookmarkRequest;
 import kr.co.bookpool.app.bookmark.service.BookmarkService;
 import kr.co.bookpool.app.campaign.dto.response.CampaignResponse;
-import kr.co.bookpool.app.campaign.dto.response.PageResponse;
+import kr.co.bookpool.common.response.PageResponse;
 import kr.co.bookpool.common.response.ApiResult;
 import lombok.RequiredArgsConstructor;
 

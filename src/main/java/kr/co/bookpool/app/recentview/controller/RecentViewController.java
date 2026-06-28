@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import kr.co.bookpool.app.campaign.dto.response.CampaignResponse;
-import kr.co.bookpool.app.campaign.dto.response.PageResponse;
+import kr.co.bookpool.common.response.PageResponse;
 import kr.co.bookpool.app.recentview.controller.docs.RecentViewControllerDocs;
 import kr.co.bookpool.app.recentview.dto.request.RecentViewRequest;
 import kr.co.bookpool.app.recentview.service.RecentViewService;

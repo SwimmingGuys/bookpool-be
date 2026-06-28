@@ -18,7 +18,7 @@ import kr.co.bookpool.app.campaign.controller.docs.AdminCampaignControllerDocs;
 import kr.co.bookpool.app.campaign.dto.request.CampaignCreateRequest;
 import kr.co.bookpool.app.campaign.dto.request.CampaignUpdateRequest;
 import kr.co.bookpool.app.campaign.dto.response.CampaignResponse;
-import kr.co.bookpool.app.campaign.dto.response.PageResponse;
+import kr.co.bookpool.common.response.PageResponse;
 import kr.co.bookpool.app.campaign.service.AdminCampaignService;
 import kr.co.bookpool.common.response.ApiResult;
 import lombok.RequiredArgsConstructor;
