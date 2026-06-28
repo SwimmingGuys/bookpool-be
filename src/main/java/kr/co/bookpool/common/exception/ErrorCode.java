@@ -28,14 +28,14 @@ public enum ErrorCode {
 	INVALID_TOKEN(UNAUTHORIZED, "A002", "유효하지 않은 인증 정보입니다."),
 	INVALID_REFRESH_TOKEN(UNAUTHORIZED, "A003", "유효하지 않은 리프레시 토큰입니다. 다시 로그인해 주세요."),
 
-	// Inquiry
-	INQUIRY_NOT_FOUND(NOT_FOUND, "I001", "문의를 찾을 수 없습니다.");
-
 	// Campaign
 	CAMPAIGN_NOT_FOUND(NOT_FOUND, "CP001", "캠페인을 찾을 수 없습니다."),
 
 	// Notice
-	NOTICE_NOT_FOUND(NOT_FOUND, "N001", "공지사항을 찾을 수 없습니다.");
+	NOTICE_NOT_FOUND(NOT_FOUND, "N001", "공지사항을 찾을 수 없습니다."),
+
+	// Inquiry
+	INQUIRY_NOT_FOUND(NOT_FOUND, "I001", "문의를 찾을 수 없습니다.");
 
 	private final HttpStatus status;
 	private final String code;
