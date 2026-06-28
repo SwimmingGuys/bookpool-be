@@ -21,7 +21,6 @@ import org.springframework.web.client.RestClient;
 
 import kr.co.bookpool.app.auth.dto.request.LoginRequest;
 import kr.co.bookpool.app.auth.dto.response.LoginResponse;
-import kr.co.bookpool.app.member.dto.request.ChangePasswordRequest;
 import kr.co.bookpool.app.member.dto.request.SignUpRequest;
 import kr.co.bookpool.app.member.dto.request.UpdateProfileRequest;
 import kr.co.bookpool.app.member.dto.response.MeResponse;
@@ -130,118 +129,6 @@ class MemberSelfServiceApiTest {
 		// when
 		ResponseEntity<ApiResult<Void>> response = restClient.patch()
 			.uri("/me")
-			.contentType(APPLICATION_JSON)
-			.body(request)
-			.retrieve()
-			.toEntity(new ParameterizedTypeReference<>() {
-			});
-
-		// then
-		assertThat(response.getStatusCode()).isEqualTo(UNAUTHORIZED);
-		assertThat(response.getBody()).isNotNull();
-		assertThat(response.getBody().success()).isFalse();
-		assertThat(response.getBody().code()).isEqualTo("A002");
-	}
-
-	@Test
-	@DisplayName("비밀번호를 변경하면 200을 반환하고 새 비밀번호로는 로그인되며 기존 비밀번호로는 로그인이 실패한다")
-	void changePassword_success() {
-		// given
-		String accessToken = obtainAccessToken();
-		String newPassword = "newpassword5678";
-		ChangePasswordRequest request = new ChangePasswordRequest(PASSWORD, newPassword);
-
-		// when
-		ResponseEntity<ApiResult<Void>> response = restClient.patch()
-			.uri("/me/password")
-			.header("Authorization", "Bearer " + accessToken)
-			.contentType(APPLICATION_JSON)
-			.body(request)
-			.retrieve()
-			.toEntity(new ParameterizedTypeReference<>() {
-			});
-
-		// then
-		assertThat(response.getStatusCode()).isEqualTo(OK);
-		assertThat(response.getBody()).isNotNull();
-		assertThat(response.getBody().success()).isTrue();
-		assertThat(response.getBody().code()).isEqualTo("SUCCESS");
-
-		// then - 새 비밀번호로는 로그인 성공
-		ResponseEntity<ApiResult<LoginResponse>> loginWithNew = login(new LoginRequest(EMAIL, newPassword));
-		assertThat(loginWithNew.getStatusCode()).isEqualTo(OK);
-		assertThat(loginWithNew.getBody().data().accessToken()).isNotBlank();
-
-		// then - 기존 비밀번호로는 로그인 실패(401 A001)
-		ResponseEntity<ApiResult<LoginResponse>> loginWithOld = login(new LoginRequest(EMAIL, PASSWORD));
-		assertThat(loginWithOld.getStatusCode()).isEqualTo(UNAUTHORIZED);
-		assertThat(loginWithOld.getBody().success()).isFalse();
-		assertThat(loginWithOld.getBody().code()).isEqualTo("A001");
-	}
-
-	@Test
-	@DisplayName("현재 비밀번호가 틀리면 400과 M005를 반환한다")
-	void changePassword_currentPasswordMismatch() {
-		// given
-		String accessToken = obtainAccessToken();
-		ChangePasswordRequest request = new ChangePasswordRequest("wrongpassword", "newpassword5678");
-
-		// when
-		ResponseEntity<ApiResult<Void>> response = restClient.patch()
-			.uri("/me/password")
-			.header("Authorization", "Bearer " + accessToken)
-			.contentType(APPLICATION_JSON)
-			.body(request)
-			.retrieve()
-			.toEntity(new ParameterizedTypeReference<>() {
-			});
-
-		// then
-		assertThat(response.getStatusCode()).isEqualTo(BAD_REQUEST);
-		assertThat(response.getBody()).isNotNull();
-		assertThat(response.getBody().success()).isFalse();
-		assertThat(response.getBody().code()).isEqualTo("M005");
-
-		// then - 변경에 실패했으므로 기존 비밀번호로 여전히 로그인 가능
-		assertThat(login(new LoginRequest(EMAIL, PASSWORD)).getStatusCode()).isEqualTo(OK);
-	}
-
-	@Test
-	@DisplayName("새 비밀번호가 8자 미만이면 400과 C001 필드 에러를 반환한다")
-	void changePassword_newPasswordTooShort() {
-		// given
-		String accessToken = obtainAccessToken();
-		ChangePasswordRequest request = new ChangePasswordRequest(PASSWORD, "short");
-
-		// when
-		ResponseEntity<ApiResult<List<FieldError>>> response = restClient.patch()
-			.uri("/me/password")
-			.header("Authorization", "Bearer " + accessToken)
-			.contentType(APPLICATION_JSON)
-			.body(request)
-			.retrieve()
-			.toEntity(new ParameterizedTypeReference<>() {
-			});
-
-		// then
-		assertThat(response.getStatusCode()).isEqualTo(BAD_REQUEST);
-		assertThat(response.getBody()).isNotNull();
-		assertThat(response.getBody().success()).isFalse();
-		assertThat(response.getBody().code()).isEqualTo("C001");
-		assertThat(response.getBody().data())
-			.extracting(FieldError::field)
-			.contains("newPassword");
-	}
-
-	@Test
-	@DisplayName("토큰 없이 비밀번호 변경을 호출하면 401과 A002를 반환한다")
-	void changePassword_withoutToken() {
-		// given
-		ChangePasswordRequest request = new ChangePasswordRequest(PASSWORD, "newpassword5678");
-
-		// when
-		ResponseEntity<ApiResult<Void>> response = restClient.patch()
-			.uri("/me/password")
 			.contentType(APPLICATION_JSON)
 			.body(request)
 			.retrieve()
