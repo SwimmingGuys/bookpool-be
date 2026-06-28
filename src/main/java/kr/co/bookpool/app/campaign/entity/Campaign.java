@@ -122,4 +122,35 @@ public class Campaign extends BaseTimeEntity {
 		return new Campaign(title, bookTitle, publisherName, category, type, applyUrl, imageUrl,
 			description, recruitStartDate, deadlineAt, announcementDate, status);
 	}
+
+	/**
+	 * 관리자 수정용. 식별자/조회수/생성시각은 보존하고 편집 가능한 필드만 갱신한다.
+	 */
+	public void update(
+		String title,
+		String bookTitle,
+		String publisherName,
+		CampaignCategory category,
+		CampaignType type,
+		String applyUrl,
+		String imageUrl,
+		String description,
+		LocalDate recruitStartDate,
+		LocalDateTime deadlineAt,
+		LocalDate announcementDate,
+		CampaignStatus status
+	) {
+		this.title = title;
+		this.bookTitle = bookTitle;
+		this.publisherName = publisherName;
+		this.category = category;
+		this.type = type;
+		this.applyUrl = applyUrl;
+		this.imageUrl = imageUrl;
+		this.description = description;
+		this.recruitStartDate = recruitStartDate;
+		this.deadlineAt = deadlineAt;
+		this.announcementDate = announcementDate;
+		this.status = status;
+	}
 }
