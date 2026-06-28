@@ -38,6 +38,7 @@ public class SecurityConfig {
 		"/api/login",
 		"/api/reissue",
 		"/api/logout",
+		"/api/password/**",
 		"/swagger-ui/**",
 		"/v3/api-docs/**",
 		"/actuator/health"

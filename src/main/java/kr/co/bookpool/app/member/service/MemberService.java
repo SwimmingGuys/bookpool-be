@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.bookpool.app.member.dto.request.ChangePasswordRequest;
+import kr.co.bookpool.app.member.dto.request.ResetPasswordRequest;
 import kr.co.bookpool.app.member.dto.request.SignUpRequest;
 import kr.co.bookpool.app.member.dto.request.UpdateProfileRequest;
 import kr.co.bookpool.app.member.dto.response.MeResponse;
@@ -15,6 +16,7 @@ import kr.co.bookpool.app.member.entity.Member;
 import kr.co.bookpool.app.member.repository.MemberRepository;
 import kr.co.bookpool.app.member.verification.EmailVerificationStore;
 import kr.co.bookpool.common.exception.BusinessException;
+import kr.co.bookpool.common.security.RefreshTokenStore;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -25,6 +27,7 @@ public class MemberService {
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final EmailVerificationStore emailVerificationStore;
+	private final RefreshTokenStore refreshTokenStore;
 
 	@Transactional
 	public SignUpResponse signUp(SignUpRequest request) {
@@ -68,6 +71,21 @@ public class MemberService {
 			throw new BusinessException(PASSWORD_MISMATCH);
 		}
 		member.changePassword(passwordEncoder.encode(request.newPassword()));
+	}
+
+	/** 비밀번호 재설정. 이메일 인증을 완료한 이메일에 한해, 본인 확인 없이 새 비밀번호로 변경한다. */
+	@Transactional
+	public void resetPassword(ResetPasswordRequest request) {
+		if (!emailVerificationStore.isVerified(request.email())) {
+			throw new BusinessException(EMAIL_NOT_VERIFIED);
+		}
+		Member member = memberRepository.findByEmail(request.email())
+			.orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
+		member.changePassword(passwordEncoder.encode(request.newPassword()));
+
+		// 인증 상태를 1회용으로 소비하고, 탈취 대응을 위해 기존 리프레시 토큰(세션)을 폐기한다.
+		emailVerificationStore.deleteVerified(request.email());
+		refreshTokenStore.delete(member.getId());
 	}
 
 	private Member findById(Long memberId) {

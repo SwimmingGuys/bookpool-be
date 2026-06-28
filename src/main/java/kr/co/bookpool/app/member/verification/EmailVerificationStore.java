@@ -18,4 +18,7 @@ public interface EmailVerificationStore {
 	void markVerified(String email, Duration ttl);
 
 	boolean isVerified(String email);
+
+	/** 인증 완료 상태를 소비(삭제)한다. 1회용으로 처리해야 하는 흐름(비밀번호 재설정 등)에서 사용한다. */
+	void deleteVerified(String email);
 }
