@@ -2,6 +2,8 @@ package kr.co.bookpool.app.notice.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,6 +24,7 @@ import lombok.NoArgsConstructor;
 	name = "notice",
 	indexes = {
 		@Index(name = "idx_notice_admin_id", columnList = "admin_id"),
+		@Index(name = "idx_notice_category", columnList = "category"),
 		@Index(name = "idx_notice_created_at", columnList = "created_at")
 	}
 )
@@ -41,4 +44,23 @@ public class Notice extends BaseTimeEntity {
 
 	@Column(nullable = false, columnDefinition = "TEXT")
 	private String content;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, columnDefinition = "ENUM('UPDATE','POLICY','MAINTENANCE','EVENT','GENERAL') DEFAULT 'GENERAL'")
+	private NoticeCategory category;
+
+	@Column(nullable = false)
+	private boolean pinned;
+
+	private Notice(Member admin, String title, String content, NoticeCategory category, boolean pinned) {
+		this.admin = admin;
+		this.title = title;
+		this.content = content;
+		this.category = category;
+		this.pinned = pinned;
+	}
+
+	public static Notice create(Member admin, String title, String content, NoticeCategory category, boolean pinned) {
+		return new Notice(admin, title, content, category, pinned);
+	}
 }

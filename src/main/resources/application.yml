@@ -33,3 +33,12 @@ app:
   email-verification:
     code-ttl: 5m
     verified-ttl: 30m
+
+# Discord 알림: 4xx/5xx 에러 응답을 웹훅으로 전달한다.
+# webhook-url은 민감 정보이므로 환경변수/secret으로 주입한다. alert.enabled는 환경별로 명시적으로 켠다.
+discord:
+  webhook-url: ${DISCORD.WEBHOOK_URL:}
+  username: Bookpool Alert
+  alert:
+    enabled: ${DISCORD.ALERT_ENABLED:false}
+    min-status: ${DISCORD.ALERT_MIN_STATUS:400}
