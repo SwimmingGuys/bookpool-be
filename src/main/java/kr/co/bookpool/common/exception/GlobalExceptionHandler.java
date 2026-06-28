@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -43,6 +44,15 @@ public class GlobalExceptionHandler {
 		return ResponseEntity
 			.status(errorCode.getStatus())
 			.body(ApiResult.error(errorCode, fieldErrors));
+	}
+
+	// 잘못된 JSON 본문/역직렬화 실패(예: 지원하지 않는 enum 값)는 입력값 오류(400)로 처리한다.
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ResponseEntity<ApiResult<Void>> handleNotReadable(HttpMessageNotReadableException e) {
+		log.warn("Malformed request body: {}", e.getMessage());
+		return ResponseEntity
+			.status(INVALID_INPUT_VALUE.getStatus())
+			.body(ApiResult.error(INVALID_INPUT_VALUE));
 	}
 
 	@ExceptionHandler(DataIntegrityViolationException.class)
