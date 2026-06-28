@@ -45,6 +45,10 @@ decorator:
       enable-logging: true
       logging: slf4j
 
+# Swagger 서버 URL (기본값 없으면 기동 실패 → 여기서 기본값 + env 오버라이드 제공)
+swagger:
+  server-url: ${SWAGGER_SERVER_URL:https://dev.bookpool.co.kr}
+
 # 개발 서버: dev.bookpool.co.kr + /api (same-origin). Redis host는 base의 ${REDIS.HOST}로 주입.
 app:
   cors:
@@ -54,4 +58,6 @@ app:
       secure: true        # dev가 https가 아닌 http면 false로 변경 (Secure 쿠키는 https에서만 전송됨)
       same-site: Lax
   mail:
+    smtp:
+      enabled: true
     from: ${MAIL.FROM:noreply@bookpool.co.kr}

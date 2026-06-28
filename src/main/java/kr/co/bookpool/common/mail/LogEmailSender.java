@@ -1,21 +1,22 @@
 package kr.co.bookpool.common.mail;
 
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 로컬/테스트용 이메일 발송 구현.
+ * 로그 출력용 이메일 발송 구현(기본값).
+ * {@code app.mail.smtp.enabled}가 false이거나 없을 때 활성화된다.
  * 실제로 메일을 보내지 않고 인증 코드를 로그로 출력해, SMTP 자격증명 없이도 인증 흐름을 테스트할 수 있게 한다.
  */
 @Slf4j
 @Component
-@Profile({"local", "test"})
+@ConditionalOnProperty(name = "app.mail.smtp.enabled", havingValue = "false", matchIfMissing = true)
 public class LogEmailSender implements EmailSender {
 
 	@Override
-	public void sendVerificationCode(String email, String code) {
-		log.info("[이메일 인증][LOG] to={}, code={} (로컬/테스트 환경: 실제 발송하지 않음)", email, code);
+	public void sendCode(String to, String messageKey, String code) {
+		log.info("[메일][LOG] to={}, type={}, code={} (실제 발송하지 않음)", to, messageKey, code);
 	}
 }
