@@ -1,5 +1,6 @@
 package kr.co.bookpool.app.campaign.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -36,6 +37,9 @@ public class Campaign extends BaseTimeEntity {
 	@Column(nullable = false, length = 255)
 	private String title;
 
+	@Column(name = "book_title", nullable = false, length = 255)
+	private String bookTitle;
+
 	@Column(name = "publisher_name", nullable = false, length = 100)
 	private String publisherName;
 
@@ -53,8 +57,20 @@ public class Campaign extends BaseTimeEntity {
 	@Column(name = "image_url", length = 500)
 	private String imageUrl;
 
+	@Column(name = "description", columnDefinition = "TEXT")
+	private String description;
+
+	@Column(name = "recruit_start_date")
+	private LocalDate recruitStartDate;
+
 	@Column(name = "deadline_at", nullable = false)
 	private LocalDateTime deadlineAt;
+
+	@Column(name = "announcement_date")
+	private LocalDate announcementDate;
+
+	@Column(name = "view_count", nullable = false)
+	private Integer viewCount = 0;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, columnDefinition = "ENUM('UPCOMING','OPEN','CLOSED') DEFAULT 'OPEN'")
@@ -62,34 +78,48 @@ public class Campaign extends BaseTimeEntity {
 
 	private Campaign(
 		String title,
+		String bookTitle,
 		String publisherName,
 		CampaignCategory category,
 		CampaignType type,
 		String applyUrl,
 		String imageUrl,
+		String description,
+		LocalDate recruitStartDate,
 		LocalDateTime deadlineAt,
+		LocalDate announcementDate,
 		CampaignStatus status
 	) {
 		this.title = title;
+		this.bookTitle = bookTitle;
 		this.publisherName = publisherName;
 		this.category = category;
 		this.type = type;
 		this.applyUrl = applyUrl;
 		this.imageUrl = imageUrl;
+		this.description = description;
+		this.recruitStartDate = recruitStartDate;
 		this.deadlineAt = deadlineAt;
+		this.announcementDate = announcementDate;
+		this.viewCount = 0;
 		this.status = status;
 	}
 
 	public static Campaign create(
 		String title,
+		String bookTitle,
 		String publisherName,
 		CampaignCategory category,
 		CampaignType type,
 		String applyUrl,
 		String imageUrl,
+		String description,
+		LocalDate recruitStartDate,
 		LocalDateTime deadlineAt,
+		LocalDate announcementDate,
 		CampaignStatus status
 	) {
-		return new Campaign(title, publisherName, category, type, applyUrl, imageUrl, deadlineAt, status);
+		return new Campaign(title, bookTitle, publisherName, category, type, applyUrl, imageUrl,
+			description, recruitStartDate, deadlineAt, announcementDate, status);
 	}
 }
