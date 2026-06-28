@@ -6,7 +6,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.co.bookpool.app.member.dto.request.ChangePasswordRequest;
 import kr.co.bookpool.app.member.dto.request.SignUpRequest;
+import kr.co.bookpool.app.member.dto.request.UpdateProfileRequest;
 import kr.co.bookpool.app.member.dto.response.MeResponse;
 import kr.co.bookpool.app.member.dto.response.SignUpResponse;
 import kr.co.bookpool.app.member.entity.Member;
@@ -49,9 +51,27 @@ public class MemberService {
 	}
 
 	public MeResponse getMyInfo(Long memberId) {
-		Member member = memberRepository.findById(memberId)
-			.orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
+		return MeResponse.from(findById(memberId));
+	}
 
+	@Transactional
+	public MeResponse updateProfile(Long memberId, UpdateProfileRequest request) {
+		Member member = findById(memberId);
+		member.updateProfile(request.nickname(), request.contact());
 		return MeResponse.from(member);
+	}
+
+	@Transactional
+	public void changePassword(Long memberId, ChangePasswordRequest request) {
+		Member member = findById(memberId);
+		if (!passwordEncoder.matches(request.currentPassword(), member.getPassword())) {
+			throw new BusinessException(PASSWORD_MISMATCH);
+		}
+		member.changePassword(passwordEncoder.encode(request.newPassword()));
+	}
+
+	private Member findById(Long memberId) {
+		return memberRepository.findById(memberId)
+			.orElseThrow(() -> new BusinessException(MEMBER_NOT_FOUND));
 	}
 }
