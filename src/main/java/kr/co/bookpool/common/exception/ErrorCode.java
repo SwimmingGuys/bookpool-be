@@ -29,12 +29,17 @@ public enum ErrorCode {
 	LOGIN_FAILED(UNAUTHORIZED, "A001", "이메일 또는 비밀번호가 올바르지 않습니다."),
 	INVALID_TOKEN(UNAUTHORIZED, "A002", "유효하지 않은 인증 정보입니다."),
 	INVALID_REFRESH_TOKEN(UNAUTHORIZED, "A003", "유효하지 않은 리프레시 토큰입니다. 다시 로그인해 주세요."),
+	ACCESS_DENIED(FORBIDDEN, "A004", "접근 권한이 없습니다."),
 
 	// Campaign
 	CAMPAIGN_NOT_FOUND(NOT_FOUND, "CP001", "캠페인을 찾을 수 없습니다."),
 
 	// Notice
 	NOTICE_NOT_FOUND(NOT_FOUND, "N001", "공지사항을 찾을 수 없습니다."),
+
+	// Bookmark
+	BOOKMARK_ALREADY_EXISTS(CONFLICT, "B001", "이미 즐겨찾기한 공고입니다."),
+	BOOKMARK_NOT_FOUND(NOT_FOUND, "B002", "즐겨찾기를 찾을 수 없습니다."),
 
 	// Inquiry
 	INQUIRY_NOT_FOUND(NOT_FOUND, "I001", "문의를 찾을 수 없습니다.");

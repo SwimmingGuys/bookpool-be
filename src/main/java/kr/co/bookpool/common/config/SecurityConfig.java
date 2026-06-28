@@ -18,10 +18,12 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import kr.co.bookpool.app.member.verification.EmailVerificationProperties;
+import kr.co.bookpool.app.member.entity.Role;
 import kr.co.bookpool.common.security.CookieProperties;
 import kr.co.bookpool.common.security.JwtAuthenticationEntryPoint;
 import kr.co.bookpool.common.security.JwtAuthenticationFilter;
 import kr.co.bookpool.common.security.JwtProperties;
+import kr.co.bookpool.common.security.RestAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -41,6 +43,7 @@ public class SecurityConfig {
 		"/api/password/email/code",
 		"/api/password/email/verify",
 		"/api/password/reset",
+		"/api/password/**",
 		"/api/notices/**",
 		"/api/campaigns/**",
 		"/swagger-ui/**",
@@ -50,6 +53,7 @@ public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+	private final RestAccessDeniedHandler restAccessDeniedHandler;
 	private final CorsProperties corsProperties;
 
 	@Bean
@@ -66,10 +70,13 @@ public class SecurityConfig {
 			// 경로별 인가 규칙
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+				.requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
 				.anyRequest().authenticated()
 			)
-			// 미인증 요청은 ApiResult 포맷의 401로 응답
-			.exceptionHandling(handler -> handler.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+			// 미인증은 ApiResult 401, 권한 부족은 ApiResult 403
+			.exceptionHandling(handler -> handler
+				.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+				.accessDeniedHandler(restAccessDeniedHandler))
 			// JWT 인증 필터 등록
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.build();

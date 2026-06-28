@@ -28,6 +28,7 @@ public class EmailVerificationService {
 	private final EmailVerificationProperties properties;
 
 	/** 회원가입 인증 코드를 발급한다. 아직 가입되지 않은 이메일만 허용한다(이미 가입 시 M001). */
+	/** 인증 코드를 발급해 Redis에 저장하고 이메일로 발송한다. (회원가입용 — 신규 이메일만 허용) */
 	public void sendCode(String email) {
 		if (memberRepository.existsByEmail(email)) {
 			throw new BusinessException(DUPLICATE_EMAIL);
@@ -45,6 +46,22 @@ public class EmailVerificationService {
 
 		String code = issueCode(email);
 		emailSender.sendCode(email, EmailSender.PASSWORD_RESET, code);
+		issueCode(email);
+	}
+
+	/** 비밀번호 재설정용 인증 코드를 발급한다. (가입된 이메일만 허용) */
+	public void sendResetCode(String email) {
+		if (!memberRepository.existsByEmail(email)) {
+			throw new BusinessException(MEMBER_NOT_FOUND);
+		}
+
+		issueCode(email);
+	}
+
+	private void issueCode(String email) {
+		String code = generateCode();
+		verificationStore.saveCode(email, code, properties.codeTtl());
+		emailSender.sendVerificationCode(email, code);
 	}
 
 	/** 코드를 검증하고, 일치하면 인증 완료 상태로 표시한다. */
