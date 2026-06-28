@@ -44,6 +44,9 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "role", nullable = false)
 	private Role role;
 
+	@Column(name = "contact", length = 100)
+	private String contact;
+
 	@Column(name = "email_subscribed", nullable = false)
 	private boolean emailSubscribed;
 
@@ -70,6 +73,15 @@ public class Member extends BaseTimeEntity {
 			.emailSubscribed(emailSubscribed)
 			.isActive(true)
 			.build();
+	}
+
+	public void updateProfile(String nickname, String contact) {
+		this.nickname = nickname;
+		this.contact = contact;
+	}
+
+	public void changePassword(String encodedPassword) {
+		this.password = encodedPassword;
 	}
 }
 

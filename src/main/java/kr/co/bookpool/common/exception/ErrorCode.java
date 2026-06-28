@@ -21,6 +21,7 @@ public enum ErrorCode {
 	MEMBER_NOT_FOUND(NOT_FOUND, "M002", "회원을 찾을 수 없습니다."),
 	EMAIL_NOT_VERIFIED(BAD_REQUEST, "M003", "이메일 인증이 완료되지 않았습니다."),
 	INVALID_VERIFICATION_CODE(BAD_REQUEST, "M004", "인증 코드가 올바르지 않거나 만료되었습니다."),
+	PASSWORD_MISMATCH(BAD_REQUEST, "M005", "현재 비밀번호가 일치하지 않습니다."),
 
 	// Auth
 	LOGIN_FAILED(UNAUTHORIZED, "A001", "이메일 또는 비밀번호가 올바르지 않습니다."),
@@ -29,6 +30,12 @@ public enum ErrorCode {
 
 	// Inquiry
 	INQUIRY_NOT_FOUND(NOT_FOUND, "I001", "문의를 찾을 수 없습니다.");
+
+	// Campaign
+	CAMPAIGN_NOT_FOUND(NOT_FOUND, "CP001", "캠페인을 찾을 수 없습니다."),
+
+	// Notice
+	NOTICE_NOT_FOUND(NOT_FOUND, "N001", "공지사항을 찾을 수 없습니다.");
 
 	private final HttpStatus status;
 	private final String code;

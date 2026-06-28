@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.co.bookpool.app.member.dto.request.ChangePasswordRequest;
 import kr.co.bookpool.app.member.dto.request.SignUpRequest;
+import kr.co.bookpool.app.member.dto.request.UpdateProfileRequest;
 import kr.co.bookpool.app.member.dto.response.MeResponse;
 import kr.co.bookpool.app.member.dto.response.SignUpResponse;
 import kr.co.bookpool.common.response.ApiResult;
@@ -71,7 +73,7 @@ public interface MemberControllerDocs {
 				  "success": true,
 				  "code": "SUCCESS",
 				  "message": "요청에 성공했습니다.",
-				  "data": { "id": 1, "email": "test@bookpool.kr", "nickname": "북풀러", "role": "USER" }
+				  "data": { "id": 1, "email": "test@bookpool.kr", "nickname": "북풀러", "contact": "010-1234-5678", "emailSubscribed": true, "role": "USER" }
 				}"""))),
 		@ApiResponse(
 			responseCode = "401", description = "인증 실패 (토큰 없음/유효하지 않음)",
@@ -83,4 +85,29 @@ public interface MemberControllerDocs {
 				}""")))
 	})
 	ApiResult<MeResponse> getMyInfo(Long memberId);
+
+	@Operation(
+		summary = "프로필 수정",
+		description = "닉네임/연락처를 수정합니다.",
+		security = @SecurityRequirement(name = "bearerAuth"))
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "수정 성공"),
+		@ApiResponse(responseCode = "400", description = "입력값 검증 실패"),
+		@ApiResponse(responseCode = "401", description = "인증 실패")
+	})
+	ApiResult<MeResponse> updateProfile(Long memberId, UpdateProfileRequest request);
+
+	@Operation(
+		summary = "비밀번호 변경",
+		description = "현재 비밀번호 확인 후 새 비밀번호로 변경합니다.",
+		security = @SecurityRequirement(name = "bearerAuth"))
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "변경 성공"),
+		@ApiResponse(
+			responseCode = "400", description = "현재 비밀번호 불일치 또는 입력값 검증 실패",
+			content = @Content(examples = @ExampleObject(value = """
+				{ "success": false, "code": "M005", "message": "현재 비밀번호가 일치하지 않습니다." }"""))),
+		@ApiResponse(responseCode = "401", description = "인증 실패")
+	})
+	ApiResult<Void> changePassword(Long memberId, ChangePasswordRequest request);
 }
