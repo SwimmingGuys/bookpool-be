@@ -1,10 +1,10 @@
 # 개발(=QA) 서버: EC2 1대에 nginx + app + mysql + redis 를 올린다.
-#   - 프론트는 별도 컨테이너가 아니라 nginx 가 정적 서빙(dist) → 운영의 S3 역할
+#   - 프론트는 nginx 가 정적 서빙(dist) → 운영의 S3 역할
 #   - nginx 의 /api/* 프록시 → 운영의 ALB 역할
-# 실행: deploy/dev 에서  docker compose --env-file .env up -d --build
+# 실행: deploy/dev 에서  docker compose up -d --build
 services:
   mysql:
-    image: mysql:8.4   # 운영 RDS 와 동일 메이저 버전으로 핀 고정(패리티)
+    image: mysql:8.4
     container_name: bookpool-dev-mysql
     restart: unless-stopped
     environment:
@@ -35,7 +35,6 @@ services:
     image: redis:7-alpine
     container_name: bookpool-dev-redis
     restart: unless-stopped
-    # AOF 영속화: 재배포해도 refresh token/인증코드 유지 (원치 않으면 command 제거)
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
@@ -50,7 +49,6 @@ services:
       - bookpool-net
 
   app:
-    # 단일 박스라 레지스트리 없이 현장 빌드. CI로 이미지를 푸시하면 build 대신 image 사용.
     build:
       context: ../..
       dockerfile: Dockerfile
@@ -61,9 +59,8 @@ services:
       SPRING_PROFILES_ACTIVE: dev
       SERVER_PORT: "8080"
     volumes:
-      # 앱 시크릿은 마운트된 secret.yml 에서 로드한다.
-      # (application-dev.yml 의 spring.config.import: optional:file:/app/config/application-secret.yml)
-      # DB.DEV.* / JWT.SECRET / REDIS.* / MAIL.* / swagger.server-url 을 여기서 주입.
+      # 앱 시크릿(DB.DEV.* / JWT.SECRET / REDIS.* / MAIL.*)을 마운트로 주입.
+      # application-dev.yml 의 spring.config.import: optional:file:/app/config/application-secret.yml
       - ./application-secret.yml:/app/config/application-secret.yml:ro
     expose:
       - "8080"
@@ -77,7 +74,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 40s
+      start_period: 60s
     networks:
       - bookpool-net
 
@@ -91,9 +88,9 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./dist:/usr/share/nginx/html:ro       # 프론트 빌드 산출물(dist) = S3 대용
-      - ./certs:/etc/nginx/certs:ro           # TLS 인증서 (certbot 발급분 마운트)
-      - ./certbot-www:/var/www/certbot         # ACM challenge webroot
-      - ./.htpasswd:/etc/nginx/.htpasswd:ro   # Swagger basic auth 계정 (htpasswd 로 생성)
+      - ./certs:/etc/nginx/certs:ro           # TLS 인증서 (certbot 발급분)
+      - ./certbot-www:/var/www/certbot         # ACME challenge webroot
+      - ./.htpasswd:/etc/nginx/.htpasswd:ro   # Swagger basic auth 계정
     depends_on:
       - app
     networks:

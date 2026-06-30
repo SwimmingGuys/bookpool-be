@@ -10,9 +10,6 @@ RUN chmod +x ./gradlew && ./gradlew --no-daemon dependencies > /dev/null 2>&1 ||
 COPY src ./src
 RUN ./gradlew --no-daemon clean bootJar -x test
 
-RUN mkdir -p /workspace/extracted \
- && java -Djarmode=tools -jar build/libs/*.jar extract --layers --destination /workspace/extracted
-
 FROM eclipse-temurin:21-jre AS runtime
 WORKDIR /app
 
@@ -20,10 +17,8 @@ RUN groupadd -r app && useradd -r -g app -u 10001 app \
  && apt-get update && apt-get install -y --no-install-recommends curl tini \
  && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /workspace/extracted/dependencies/ ./
-COPY --from=builder /workspace/extracted/spring-boot-loader/ ./
-COPY --from=builder /workspace/extracted/snapshot-dependencies/ ./
-COPY --from=builder /workspace/extracted/application/ ./
+# 부트 fat jar 를 그대로 실행 (레이어 추출/JarLauncher 방식은 Boot 4 추출 레이아웃과 불일치)
+COPY --from=builder /workspace/build/libs/*.jar app.jar
 
 USER app
 EXPOSE 8080
@@ -31,4 +26,4 @@ EXPOSE 8080
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError"
 ENV SPRING_PROFILES_ACTIVE=prod
 
-ENTRYPOINT ["/usr/bin/tini", "--", "java", "org.springframework.boot.loader.launch.JarLauncher"]
+ENTRYPOINT ["/usr/bin/tini", "--", "java", "-jar", "/app/app.jar"]
