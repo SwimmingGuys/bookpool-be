@@ -58,6 +58,9 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SERVER_PORT: "8080"
+      # dev 서버는 마이그레이션 도구가 없어 Hibernate가 엔티티로 스키마를 생성/갱신한다.
+      # (운영은 별도 마이그레이션으로 관리. update는 컬럼 추가만, 삭제는 안 함)
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
     volumes:
       # 앱 시크릿(DB.DEV.* / JWT.SECRET / REDIS.* / MAIL.*)을 마운트로 주입.
       # application-dev.yml 의 spring.config.import: optional:file:/app/config/application-secret.yml
