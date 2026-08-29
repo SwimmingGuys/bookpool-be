@@ -90,7 +90,8 @@ public class CampaignService {
 		for (Object[] row : campaignRepository.countByCategory(PublishStatus.PUBLISHED, CampaignStatus.OPEN)) {
 			CampaignCategory category = (CampaignCategory)row[0];
 			long count = (Long)row[1];
-			counts.add(new CategoryCountResponse(category.getLabel(), count));
+			// 프론트가 카테고리 키로 enum 이름을 쓴다.
+			counts.add(new CategoryCountResponse(category.name(), count));
 		}
 		return counts;
 	}

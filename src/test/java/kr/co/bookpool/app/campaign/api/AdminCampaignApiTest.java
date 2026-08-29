@@ -115,7 +115,7 @@ class AdminCampaignApiTest {
 		assertThat(created.getBody().success()).isTrue();
 		assertThat(created.getBody().data().title()).isEqualTo("스프링 부트 리뷰어 모집");
 		assertThat(created.getBody().data().bookTitle()).isEqualTo("스프링 인 액션");
-		assertThat(created.getBody().data().category()).isEqualTo("IT/개발");
+		assertThat(created.getBody().data().category()).isEqualTo("IT");
 		assertThat(created.getBody().data().status()).isEqualTo("open");
 		assertThat(created.getBody().data().viewCount()).isZero();
 
@@ -175,7 +175,7 @@ class AdminCampaignApiTest {
 		assertThat(response.getBody().success()).isTrue();
 		assertThat(response.getBody().data().id()).isEqualTo(id);
 		assertThat(response.getBody().data().title()).isEqualTo("수정 후 제목");
-		assertThat(response.getBody().data().category()).isEqualTo("소설");
+		assertThat(response.getBody().data().category()).isEqualTo("NOVEL");
 		assertThat(response.getBody().data().status()).isEqualTo("closed");
 		assertThat(response.getBody().data().viewCount()).isEqualTo(origin.viewCount());
 	}

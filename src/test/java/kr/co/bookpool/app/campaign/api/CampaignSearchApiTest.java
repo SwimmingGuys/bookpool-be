@@ -71,7 +71,7 @@ class CampaignSearchApiTest {
 
 		// then
 		assertThat(content).extracting(CampaignResponse::category)
-			.containsExactlyInAnyOrder("자기계발", "학습/교육", "기획/디자인");
+			.containsExactlyInAnyOrder("SELF_DEVELOPMENT", "EDUCATION", "PLANNING_DESIGN");
 	}
 
 	@Test
@@ -207,8 +207,8 @@ class CampaignSearchApiTest {
 		assertThat(response.getStatusCode()).isEqualTo(OK);
 		assertThat(response.getBody().data())
 			.containsExactlyInAnyOrder(
-				new CategoryCountResponse("IT/개발", 2),
-				new CategoryCountResponse("소설", 1)
+				new CategoryCountResponse("IT", 2),
+				new CategoryCountResponse("NOVEL", 1)
 			);
 	}
 

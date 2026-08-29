@@ -53,7 +53,9 @@ public record CampaignResponse(
 			campaign.getTitle(),
 			campaign.getBookTitle(),
 			campaign.getPublisherName(),
-			campaign.getCategory().getLabel(),
+			// 라벨이 아니라 enum 이름을 내려준다. 라벨은 표시용이라 바뀔 수 있고,
+			// 프론트가 필터 쿼리에 그대로 되돌려 보내는 값이기도 하다.
+			campaign.getCategory().name(),
 			campaign.getViewCount() == null ? 0 : campaign.getViewCount(),
 			status,
 			campaign.getRecruitStartDate(),
