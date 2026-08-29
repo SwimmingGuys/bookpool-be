@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -70,6 +71,9 @@ public class SecurityConfig {
 			// 경로별 인가 규칙
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+				// 공고 상세의 서평 목록은 비로그인도 본다. 정확히 이 경로만 열어
+				// /api/reviews/me와 쓰기 동작은 인증을 유지한다.
+				.requestMatchers(HttpMethod.GET, "/api/reviews").permitAll()
 				.requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
 				.anyRequest().authenticated()
 			)

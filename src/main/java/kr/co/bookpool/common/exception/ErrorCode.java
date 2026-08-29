@@ -42,7 +42,12 @@ public enum ErrorCode {
 	BOOKMARK_NOT_FOUND(NOT_FOUND, "B002", "즐겨찾기를 찾을 수 없습니다."),
 
 	// Inquiry
-	INQUIRY_NOT_FOUND(NOT_FOUND, "I001", "문의를 찾을 수 없습니다.");
+	INQUIRY_NOT_FOUND(NOT_FOUND, "I001", "문의를 찾을 수 없습니다."),
+
+	// Review
+	REVIEW_NOT_FOUND(NOT_FOUND, "R001", "서평을 찾을 수 없습니다."),
+	REVIEW_ALREADY_EXISTS(CONFLICT, "R002", "이미 이 공고에 서평을 등록했습니다."),
+	REVIEW_FORBIDDEN(FORBIDDEN, "R003", "본인이 작성한 서평만 수정하거나 삭제할 수 있습니다.");
 
 	private final HttpStatus status;
 	private final String code;
