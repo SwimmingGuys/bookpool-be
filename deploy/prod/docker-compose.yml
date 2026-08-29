@@ -1,9 +1,9 @@
-# 운영 서버: Ubuntu 단일 박스에 caddy + web(SPA) + app + mysql + redis.
+# 운영 서버: Ubuntu 단일 박스에 nginx + web(SPA) + app + mysql + redis.
 #
 # dev(deploy/dev)와 다른 점:
 #   - 소스에서 빌드하지 않는다. GHCR에 올라간 이미지를 pull 해서 쓴다.
 #   - SPA도 이미지다. 백엔드와 같은 방식으로 배포·롤백된다.
-#   - TLS는 Caddy가 자동 발급한다 (certbot 수동 갱신 없음).
+#   - 인증서 갱신이 cron으로 자동화돼 있다 (renew-cert.sh).
 #   - SPRING_JPA_HIBERNATE_DDL_AUTO를 주지 않는다.
 #     application-prod.yml이 ddl-auto: none 이므로 스키마는 마이그레이션으로만 바꾼다.
 #
@@ -107,7 +107,7 @@ services:
     image: ${REGISTRY:-ghcr.io}/${WEB_IMAGE_NAME}:${WEB_IMAGE_TAG:-latest}
     container_name: bookpool-web
     restart: unless-stopped
-    # 정적 파일만 내려준다. TLS와 /api 라우팅은 caddy가 맡는다.
+    # 정적 파일만 내려준다. TLS와 /api 라우팅은 앞단 nginx가 맡는다.
     expose:
       - "80"
     healthcheck:
@@ -118,25 +118,27 @@ services:
     networks:
       - bookpool-net
 
-  caddy:
-    image: caddy:2-alpine
-    container_name: bookpool-caddy
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: bookpool-nginx
     restart: unless-stopped
-    environment:
-      SITE_DOMAIN: ${SITE_DOMAIN}
-      ACME_EMAIL: ${ACME_EMAIL}
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      # 발급받은 인증서. 이 볼륨을 지우면 재발급되므로 Let's Encrypt 한도에 주의.
-      - caddy_data:/data
-      - caddy_config:/config
-      - caddy_logs:/var/log/caddy
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # certbot 발급물. init-cert.sh 로 먼저 받아야 nginx가 뜬다.
+      # named volume 이 아니라 바인드 마운트인 이유: 백업·확인이 쉽고
+      # certbot 컨테이너와 경로를 맞추기 쉽다.
+      - ./certs:/etc/letsencrypt:ro
+      # ACME 챌린지 webroot (갱신용)
+      - ./certbot-www:/var/www/certbot:ro
     depends_on:
       - app
       - web
+    # 헬스체크를 두지 않는다. 진입점이라 죽으면 사이트 전체가 안 뜨므로 바로 드러나고,
+    # 리다이렉트(301)·404를 성공으로 볼지 애매해 항상 통과하는 가짜 체크가 되기 쉽다.
+    # 크래시 시 복구는 restart 정책이 담당한다.
     networks:
       - bookpool-net
 
@@ -144,9 +146,6 @@ volumes:
   mysql_data:
   redis_data:
   uploads_data:
-  caddy_data:
-  caddy_config:
-  caddy_logs:
 
 networks:
   bookpool-net:

@@ -62,7 +62,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "deploy/prod/docker-compose.yml,deploy/prod/Caddyfile,deploy/prod/backup-mysql.sh"
+          source: "deploy/prod/docker-compose.yml,deploy/prod/nginx.conf,deploy/prod/backup-mysql.sh,deploy/prod/init-cert.sh,deploy/prod/renew-cert.sh"
           target: "~/bookpool"
           strip_components: 2
           overwrite: true
@@ -109,10 +109,14 @@ jobs:
             source .env.images
             set +a
 
-            chmod +x backup-mysql.sh || true
+            chmod +x backup-mysql.sh init-cert.sh renew-cert.sh || true
 
             docker compose pull
             docker compose up -d
+
+            # nginx.conf 는 마운트라 컨테이너 재생성 없이 reload 로 반영한다.
+            # (인증서가 아직 없어 nginx가 안 떠 있는 최초 배포에서는 건너뛴다)
+            docker exec bookpool-nginx nginx -s reload 2>/dev/null || true
 
             # 5) 헬스체크 대기 (최대 90초 — 최초 기동은 MySQL 초기화 포함)
             echo "Waiting for app to be healthy..."
