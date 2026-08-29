@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.co.bookpool.app.member.dto.request.EmailSubscriptionRequest;
 import kr.co.bookpool.app.member.dto.request.SignUpRequest;
 import kr.co.bookpool.app.member.dto.request.UpdateProfileRequest;
 import kr.co.bookpool.app.member.dto.response.MeResponse;
@@ -57,6 +58,13 @@ public class MemberService {
 	public MeResponse updateProfile(Long memberId, UpdateProfileRequest request) {
 		Member member = findById(memberId);
 		member.updateProfile(request.nickname(), request.contact());
+		return MeResponse.from(member);
+	}
+
+	@Transactional
+	public MeResponse updateEmailSubscription(Long memberId, EmailSubscriptionRequest request) {
+		Member member = findById(memberId);
+		member.changeEmailSubscription(request.emailSubscribed());
 		return MeResponse.from(member);
 	}
 

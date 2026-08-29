@@ -21,6 +21,7 @@ import org.springframework.web.client.RestClient;
 
 import kr.co.bookpool.app.auth.dto.request.LoginRequest;
 import kr.co.bookpool.app.auth.dto.response.LoginResponse;
+import kr.co.bookpool.app.member.dto.request.EmailSubscriptionRequest;
 import kr.co.bookpool.app.member.dto.request.SignUpRequest;
 import kr.co.bookpool.app.member.dto.request.UpdateProfileRequest;
 import kr.co.bookpool.app.member.dto.response.MeResponse;
@@ -139,6 +140,44 @@ class MemberSelfServiceApiTest {
 		assertThat(response.getStatusCode()).isEqualTo(UNAUTHORIZED);
 		assertThat(response.getBody()).isNotNull();
 		assertThat(response.getBody().success()).isFalse();
+		assertThat(response.getBody().code()).isEqualTo("A002");
+	}
+
+	@Test
+	@DisplayName("이메일 수신 동의를 켜고 끄면 내 정보 조회에 반영된다")
+	void updateEmailSubscription_success() {
+		// given
+		String accessToken = obtainAccessToken();
+		boolean before = getMyInfo(accessToken).getBody().data().emailSubscribed();
+
+		// when - 반대 값으로 변경
+		ResponseEntity<ApiResult<MeResponse>> response = restClient.patch()
+			.uri("/me/email-subscription")
+			.header("Authorization", "Bearer " + accessToken)
+			.contentType(APPLICATION_JSON)
+			.body(new EmailSubscriptionRequest(!before))
+			.retrieve()
+			.toEntity(new ParameterizedTypeReference<>() {
+			});
+
+		// then
+		assertThat(response.getStatusCode()).isEqualTo(OK);
+		assertThat(response.getBody().data().emailSubscribed()).isEqualTo(!before);
+		assertThat(getMyInfo(accessToken).getBody().data().emailSubscribed()).isEqualTo(!before);
+	}
+
+	@Test
+	@DisplayName("토큰 없이 이메일 수신 동의를 변경하면 401 A002를 반환한다")
+	void updateEmailSubscription_unauthorized() {
+		ResponseEntity<ApiResult<MeResponse>> response = restClient.patch()
+			.uri("/me/email-subscription")
+			.contentType(APPLICATION_JSON)
+			.body(new EmailSubscriptionRequest(true))
+			.retrieve()
+			.toEntity(new ParameterizedTypeReference<>() {
+			});
+
+		assertThat(response.getStatusCode()).isEqualTo(UNAUTHORIZED);
 		assertThat(response.getBody().code()).isEqualTo("A002");
 	}
 

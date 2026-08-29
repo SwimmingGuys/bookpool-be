@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.co.bookpool.app.member.dto.request.EmailSubscriptionRequest;
 import kr.co.bookpool.app.member.dto.request.SignUpRequest;
 import kr.co.bookpool.app.member.dto.request.UpdateProfileRequest;
 import kr.co.bookpool.app.member.dto.response.MeResponse;
@@ -95,4 +96,14 @@ public interface MemberControllerDocs {
 		@ApiResponse(responseCode = "401", description = "인증 실패")
 	})
 	ApiResult<MeResponse> updateProfile(Long memberId, UpdateProfileRequest request);
+
+	@Operation(
+		summary = "이메일 수신 동의 변경",
+		description = "모집 소식 이메일 수신 여부를 켜고 끕니다.",
+		security = @SecurityRequirement(name = "bearerAuth"))
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "변경 성공"),
+		@ApiResponse(responseCode = "401", description = "인증 필요")
+	})
+	ApiResult<MeResponse> updateEmailSubscription(Long memberId, EmailSubscriptionRequest request);
 }

@@ -63,4 +63,12 @@ public class Notice extends BaseTimeEntity {
 	public static Notice create(Member admin, String title, String content, NoticeCategory category, boolean pinned) {
 		return new Notice(admin, title, content, category, pinned);
 	}
+
+	/** 작성자와 생성시각은 보존하고 본문만 갱신한다. */
+	public void update(String title, String content, NoticeCategory category, boolean pinned) {
+		this.title = title;
+		this.content = content;
+		this.category = category;
+		this.pinned = pinned;
+	}
 }
