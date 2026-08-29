@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 인증서 갱신. cron으로 하루 두 번 돌린다.
-#   0 3,15 * * * /home/park/bookpool/renew-cert.sh >> /home/park/bookpool/certbot.log 2>&1
+#   0 3,15 * * * /bookpool/renew-cert.sh >> /bookpool/certbot.log 2>&1
 #
 # Let's Encrypt 인증서는 90일짜리다. certbot renew 는 만료 30일 전부터만 실제로
 # 갱신하고 그 외에는 아무것도 하지 않으므로, 자주 돌려도 부담이 없다.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # MySQL 논리 백업. cron으로 매일 돌린다.
-#   0 4 * * * /home/park/bookpool/backup-mysql.sh >> /home/park/bookpool/backups/backup.log 2>&1
+#   0 4 * * * /bookpool/backup-mysql.sh >> /bookpool/backups/backup.log 2>&1
 #
 # 볼륨만 믿으면 서버가 죽을 때 데이터도 같이 죽는다.
 # 여기서 만든 파일을 주기적으로 서버 밖(S3 등)으로 옮기는 것까지가 백업이다.

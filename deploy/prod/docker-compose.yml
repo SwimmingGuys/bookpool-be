@@ -7,7 +7,7 @@
 #   - SPRING_JPA_HIBERNATE_DDL_AUTO를 주지 않는다.
 #     application-prod.yml이 ddl-auto: none 이므로 스키마는 마이그레이션으로만 바꾼다.
 #
-# 실행: ~/bookpool 에서  docker compose up -d
+# 실행: /bookpool 에서  docker compose up -d
 services:
   mysql:
     image: mysql:8.4

@@ -40,23 +40,15 @@ sudo ufw enable
 # 3) 타임존
 sudo timedatectl set-timezone Asia/Seoul
 
-# 4) 디렉터리
-mkdir -p ~/bookpool/backups
-
-# 5) (선택) 루트에서 바로 보이도록 심볼릭 링크
-#    반드시 이름을 'bookpool' 로 맞춘다 — 아래 주의 참고
-sudo ln -s /home/park/bookpool /bookpool
+# 4) 배포 디렉터리 — /bookpool
+#    배포 계정(park)이 CD로 파일을 쓰므로 소유권을 넘겨야 한다.
+sudo mkdir -p /bookpool/backups
+sudo chown -R park:park /bookpool
 ```
 
-> **심볼릭 링크 이름은 반드시 `bookpool`.**
-> docker compose 는 *입력한 디렉터리 이름*으로 프로젝트명을 정한다.
-> `/bookpool` 과 `/home/park/bookpool` 은 이름이 같으므로 프로젝트명도 볼륨명도
-> (`bookpool_mysql_data`) 동일해 어느 쪽에서 실행하든 같은 컨테이너를 가리킨다.
->
-> 이름을 다르게 주면(예: `/app`) **별개 프로젝트로 인식돼 빈 MySQL이 새로 뜬다.**
-> 실제 데이터는 원래 볼륨에 남아 있지만, 서비스는 빈 DB를 보게 된다.
->
-> 실 경로는 `/home/park/bookpool` 그대로다. CD·cron 은 절대경로를 쓰므로 영향이 없다.
+> 디렉터리 이름은 **반드시 `bookpool`**. docker compose 는 디렉터리 이름으로
+> 프로젝트명을 정하고, 볼륨명도 거기서 나온다(`bookpool_mysql_data`).
+> 이름을 바꾸면 별개 프로젝트로 인식돼 **빈 MySQL이 새로 뜬다.**
 
 DNS A레코드가 이 서버를 가리켜야 certbot이 인증서를 받는다. **DNS부터 붙이고 배포한다.**
 
@@ -66,7 +58,7 @@ DNS A레코드가 이 서버를 가리켜야 certbot이 인증서를 받는다. 
 그래서 nginx를 띄우기 전에 한 번 받아야 한다.
 
 ```bash
-cd ~/bookpool
+cd /bookpool
 ./init-cert.sh          # certbot standalone (80 포트를 직접 잡는다)
 docker compose up -d    # 그다음 전체 기동
 ```
@@ -79,7 +71,7 @@ docker compose up -d    # 그다음 전체 기동
 ```bash
 crontab -e
 # 하루 두 번. certbot은 만료 30일 전부터만 실제로 갱신하므로 자주 돌려도 부담이 없다.
-0 3,15 * * * /home/park/bookpool/renew-cert.sh >> /home/park/bookpool/certbot.log 2>&1
+0 3,15 * * * /bookpool/renew-cert.sh >> /bookpool/certbot.log 2>&1
 ```
 
 갱신은 nginx를 띄운 채 webroot 방식으로 하고, 끝나면 `nginx -s reload` 한다(무중단).
@@ -88,13 +80,13 @@ crontab -e
 
 ```bash
 ./renew-cert.sh                      # 아직 갱신 시점이 아니면 아무 일도 안 일어난다
-docker run --rm -v ~/bookpool/certs:/etc/letsencrypt \
+docker run --rm -v /bookpool/certs:/etc/letsencrypt \
   certbot/certbot certificates       # 만료일 확인
 ```
 
 ## 시크릿
 
-`~/bookpool/.env` 하나에 모인다. `.env.example` 을 채워 GitHub Secret **`ENV_FILE`** 에
+`/bookpool/.env` 하나에 모인다. `.env.example` 을 채워 GitHub Secret **`ENV_FILE`** 에
 통째로 넣어두면 CD가 배포 때마다 서버에 기록한다(권한 600).
 
 `DB.PROD.URL` 처럼 점이 든 이름은 셸 변수로 못 쓴다. `.env` 에는 `DB_PROD_URL` 같은
@@ -139,7 +131,7 @@ docker run --rm -v ~/bookpool/certs:/etc/letsencrypt \
 수동 배포:
 
 ```bash
-cd ~/bookpool
+cd /bookpool
 docker compose pull && docker compose up -d
 docker compose ps
 ```
@@ -149,7 +141,7 @@ docker compose ps
 이미지 태그만 되돌리면 된다.
 
 ```bash
-cd ~/bookpool
+cd /bookpool
 sed -i 's/^APP_IMAGE_TAG=.*/APP_IMAGE_TAG=sha-abc1234/' .env.images
 set -a; source .env.images; set +a
 docker compose up -d app
@@ -162,9 +154,9 @@ docker compose up -d app
 ```bash
 crontab -e
 # 매일 04:00 백업
-0 4 * * * /home/park/bookpool/backup-mysql.sh >> /home/park/bookpool/backups/backup.log 2>&1
+0 4 * * * /bookpool/backup-mysql.sh >> /bookpool/backups/backup.log 2>&1
 # 하루 두 번 인증서 갱신 확인
-0 3,15 * * * /home/park/bookpool/renew-cert.sh >> /home/park/bookpool/certbot.log 2>&1
+0 3,15 * * * /bookpool/renew-cert.sh >> /bookpool/certbot.log 2>&1
 ```
 
 > 이 스크립트는 **서버 안에** 파일을 만들 뿐이다. 서버가 통째로 죽으면 백업도 같이 죽는다.

@@ -63,7 +63,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "deploy/prod/docker-compose.yml,deploy/prod/nginx.conf,deploy/prod/backup-mysql.sh,deploy/prod/init-cert.sh,deploy/prod/renew-cert.sh"
-          target: "~/bookpool"
+          target: "/bookpool"
           strip_components: 2
           overwrite: true
 
@@ -83,8 +83,7 @@ jobs:
           envs: ENV_FILE,REGISTRY,IMAGE_NAME,IMAGE_TAG,GH_ACTOR,GH_TOKEN
           script: |
             set -e
-            mkdir -p ~/bookpool
-            cd ~/bookpool
+            cd /bookpool
 
             # 1) GHCR 인증 (private 패키지면 필수)
             echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
