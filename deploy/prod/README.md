@@ -42,7 +42,21 @@ sudo timedatectl set-timezone Asia/Seoul
 
 # 4) 디렉터리
 mkdir -p ~/bookpool/backups
+
+# 5) (선택) 루트에서 바로 보이도록 심볼릭 링크
+#    반드시 이름을 'bookpool' 로 맞춘다 — 아래 주의 참고
+sudo ln -s /home/park/bookpool /bookpool
 ```
+
+> **심볼릭 링크 이름은 반드시 `bookpool`.**
+> docker compose 는 *입력한 디렉터리 이름*으로 프로젝트명을 정한다.
+> `/bookpool` 과 `/home/park/bookpool` 은 이름이 같으므로 프로젝트명도 볼륨명도
+> (`bookpool_mysql_data`) 동일해 어느 쪽에서 실행하든 같은 컨테이너를 가리킨다.
+>
+> 이름을 다르게 주면(예: `/app`) **별개 프로젝트로 인식돼 빈 MySQL이 새로 뜬다.**
+> 실제 데이터는 원래 볼륨에 남아 있지만, 서비스는 빈 DB를 보게 된다.
+>
+> 실 경로는 `/home/park/bookpool` 그대로다. CD·cron 은 절대경로를 쓰므로 영향이 없다.
 
 DNS A레코드가 이 서버를 가리켜야 certbot이 인증서를 받는다. **DNS부터 붙이고 배포한다.**
 
