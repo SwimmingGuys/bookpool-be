@@ -52,6 +52,10 @@ public enum ErrorCode {
 	// Notification
 	NOTIFICATION_NOT_FOUND(NOT_FOUND, "NT001", "알림을 찾을 수 없습니다."),
 
+	// Application
+	APPLICATION_NOT_FOUND(NOT_FOUND, "AP001", "신청 기록을 찾을 수 없습니다."),
+	APPLICATION_ALREADY_EXISTS(CONFLICT, "AP002", "이미 신청한 공고입니다."),
+
 	// Upload
 	UPLOAD_UNSUPPORTED_TYPE(BAD_REQUEST, "U001", "이미지 파일만 업로드할 수 있습니다."),
 	UPLOAD_TOO_LARGE(BAD_REQUEST, "U002", "이미지 용량이 허용 범위를 넘었습니다."),

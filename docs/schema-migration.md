@@ -68,8 +68,10 @@ CREATE INDEX idx_campaign_publisher_name ON campaign (publisher_name);
 | `campaign_review_channel` | 공고별 서평 의무 채널 (`@ElementCollection`) |
 | `review` | 참여자가 제출한 서평 |
 | `notification` | 사용자별 알림 큐 |
+| `application` | 사용자가 표시한 신청 기록 (자기 신고) |
 
-`review`에는 `uk_review_campaign_member` 유니크 제약이 있다(한 공고에 서평 1건).
+`review`에는 `uk_review_campaign_member`, `application`에는
+`uk_application_member_campaign` 유니크 제약이 있다(한 공고에 각각 1건).
 
 ## 5. 업로드 디렉터리
 
