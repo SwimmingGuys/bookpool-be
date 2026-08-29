@@ -47,7 +47,15 @@ public enum ErrorCode {
 	// Review
 	REVIEW_NOT_FOUND(NOT_FOUND, "R001", "서평을 찾을 수 없습니다."),
 	REVIEW_ALREADY_EXISTS(CONFLICT, "R002", "이미 이 공고에 서평을 등록했습니다."),
-	REVIEW_FORBIDDEN(FORBIDDEN, "R003", "본인이 작성한 서평만 수정하거나 삭제할 수 있습니다.");
+	REVIEW_FORBIDDEN(FORBIDDEN, "R003", "본인이 작성한 서평만 수정하거나 삭제할 수 있습니다."),
+
+	// Notification
+	NOTIFICATION_NOT_FOUND(NOT_FOUND, "NT001", "알림을 찾을 수 없습니다."),
+
+	// Upload
+	UPLOAD_UNSUPPORTED_TYPE(BAD_REQUEST, "U001", "이미지 파일만 업로드할 수 있습니다."),
+	UPLOAD_TOO_LARGE(BAD_REQUEST, "U002", "이미지 용량이 허용 범위를 넘었습니다."),
+	UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "U003", "이미지 업로드에 실패했습니다.");
 
 	private final HttpStatus status;
 	private final String code;

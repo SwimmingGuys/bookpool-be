@@ -18,6 +18,7 @@ import kr.co.bookpool.app.campaign.entity.CampaignStatus;
 import kr.co.bookpool.app.campaign.entity.PublishStatus;
 import kr.co.bookpool.app.campaign.repository.CampaignRepository;
 import kr.co.bookpool.app.campaign.repository.CampaignSpecifications;
+import kr.co.bookpool.app.notification.service.NotificationFanoutService;
 import kr.co.bookpool.common.exception.BusinessException;
 import kr.co.bookpool.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class AdminCampaignService {
 	private static final int MAX_PAGE_SIZE = 100;
 
 	private final CampaignRepository campaignRepository;
+	private final NotificationFanoutService notificationFanoutService;
 
 	/**
 	 * 백오피스 목록. publishStatus로 검수 큐(DRAFT)와 게시된 공고를 나눠 본다.
@@ -64,12 +66,15 @@ public class AdminCampaignService {
 	@Transactional
 	public CampaignResponse create(CampaignCreateRequest request) {
 		Campaign saved = campaignRepository.save(request.toEntity());
+		// 검수 대기로 저장한 공고는 게시될 때 알린다.
+		notificationFanoutService.notifyNewCampaign(saved);
 		return CampaignResponse.from(saved);
 	}
 
 	@Transactional
 	public CampaignResponse update(Long campaignId, CampaignUpdateRequest request) {
 		Campaign campaign = findById(campaignId);
+		boolean wasPublished = campaign.isPublished();
 		campaign.update(
 			request.title(), request.bookTitle(), request.publisherName(), request.category(),
 			request.type(), request.applyUrl(), request.imageUrl(), request.description(),
@@ -77,6 +82,10 @@ public class AdminCampaignService {
 			request.capacity(), request.bookFormat(), request.reviewChannels(), request.reviewDueDate(),
 			request.requirements(), request.source(), request.sourceUrl(), request.publishStatus()
 		);
+		// 검수를 통과해 처음 공개되는 순간에만 알린다(수정 때마다 다시 보내지 않는다).
+		if (!wasPublished && campaign.isPublished()) {
+			notificationFanoutService.notifyNewCampaign(campaign);
+		}
 		return CampaignResponse.from(campaign);
 	}
 
@@ -84,7 +93,11 @@ public class AdminCampaignService {
 	@Transactional
 	public CampaignResponse changePublishStatus(Long campaignId, PublishStatus publishStatus) {
 		Campaign campaign = findById(campaignId);
+		boolean wasPublished = campaign.isPublished();
 		campaign.changePublishStatus(publishStatus);
+		if (!wasPublished && campaign.isPublished()) {
+			notificationFanoutService.notifyNewCampaign(campaign);
+		}
 		return CampaignResponse.from(campaign);
 	}
 

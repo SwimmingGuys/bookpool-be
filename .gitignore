@@ -45,3 +45,5 @@ application-secret.yml
 ### Deploy ###
 deploy/.env
 deploy/.env
+# 로컬 이미지 업로드 저장 위치
+uploads/
