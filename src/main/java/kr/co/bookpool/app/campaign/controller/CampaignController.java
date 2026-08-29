@@ -2,8 +2,10 @@ package kr.co.bookpool.app.campaign.controller;
 
 import static org.springframework.http.HttpStatus.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,14 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.bookpool.app.campaign.controller.docs.CampaignControllerDocs;
 import kr.co.bookpool.app.campaign.dto.request.CampaignSearchCondition;
+import kr.co.bookpool.app.campaign.dto.request.DateBasis;
 import kr.co.bookpool.app.campaign.dto.request.DeadlineFilter;
 import kr.co.bookpool.app.campaign.dto.request.SortKey;
 import kr.co.bookpool.app.campaign.dto.response.CampaignResponse;
-import kr.co.bookpool.common.response.PageResponse;
+import kr.co.bookpool.app.campaign.dto.response.CategoryCountResponse;
 import kr.co.bookpool.app.campaign.entity.CampaignCategory;
 import kr.co.bookpool.app.campaign.entity.CampaignType;
 import kr.co.bookpool.app.campaign.service.CampaignService;
 import kr.co.bookpool.common.response.ApiResult;
+import kr.co.bookpool.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -35,18 +39,28 @@ public class CampaignController implements CampaignControllerDocs {
 	@GetMapping
 	public ApiResult<PageResponse<CampaignResponse>> list(
 		@RequestParam(required = false) String query,
+		@RequestParam(required = false) String publisher,
 		@RequestParam(required = false) List<CampaignCategory> categories,
 		@RequestParam(required = false) List<CampaignType> types,
 		@RequestParam(required = false, defaultValue = "ALL") DeadlineFilter deadline,
+		@RequestParam(required = false) Integer withinDays,
+		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+		@RequestParam(required = false, defaultValue = "RECRUIT_END") DateBasis dateBasis,
 		@RequestParam(required = false, defaultValue = "DEADLINE") SortKey sort,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "20") int size
 	) {
 		CampaignSearchCondition condition = CampaignSearchCondition.builder()
 			.query(query)
+			.publisher(publisher)
 			.categories(categories)
 			.types(types)
 			.deadline(deadline)
+			.withinDays(withinDays)
+			.from(from)
+			.to(to)
+			.dateBasis(dateBasis)
 			.sort(sort)
 			.build();
 		return ApiResult.success(campaignService.search(condition, page, size));
@@ -64,5 +78,12 @@ public class CampaignController implements CampaignControllerDocs {
 	@GetMapping("/publishers")
 	public ApiResult<List<String>> publishers() {
 		return ApiResult.success(campaignService.getAllPublishers());
+	}
+
+	@Override
+	@ResponseStatus(OK)
+	@GetMapping("/category-counts")
+	public ApiResult<List<CategoryCountResponse>> categoryCounts() {
+		return ApiResult.success(campaignService.countByCategory());
 	}
 }

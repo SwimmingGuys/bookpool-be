@@ -28,9 +28,13 @@ import kr.co.bookpool.app.campaign.dto.request.CampaignCreateRequest;
 import kr.co.bookpool.app.campaign.dto.request.CampaignUpdateRequest;
 import kr.co.bookpool.app.campaign.dto.response.CampaignResponse;
 import kr.co.bookpool.common.response.PageResponse;
+import kr.co.bookpool.app.campaign.entity.BookFormat;
 import kr.co.bookpool.app.campaign.entity.CampaignCategory;
+import kr.co.bookpool.app.campaign.entity.CampaignSource;
 import kr.co.bookpool.app.campaign.entity.CampaignStatus;
 import kr.co.bookpool.app.campaign.entity.CampaignType;
+import kr.co.bookpool.app.campaign.entity.PublishStatus;
+import kr.co.bookpool.app.campaign.entity.ReviewChannel;
 import kr.co.bookpool.app.campaign.repository.CampaignRepository;
 import kr.co.bookpool.app.member.entity.Member;
 import kr.co.bookpool.app.member.repository.MemberRepository;
@@ -152,7 +156,9 @@ class AdminCampaignApiTest {
 			"수정 후 제목", "수정된 책", "수정된 출판사", CampaignCategory.NOVEL, CampaignType.BETA_READER,
 			"https://apply.example.com/edit", null, "수정된 설명",
 			LocalDate.now(), LocalDateTime.now().plusDays(10), LocalDate.now().plusDays(20),
-			CampaignStatus.CLOSED);
+			CampaignStatus.CLOSED,
+			20, BookFormat.EBOOK, List.of(ReviewChannel.INSTAGRAM), LocalDate.now().plusDays(30),
+			"인스타 팔로워 500명 이상", CampaignSource.MANUAL, null, PublishStatus.PUBLISHED);
 
 		// when
 		ResponseEntity<ApiResult<CampaignResponse>> response = restClient.put()
@@ -226,7 +232,8 @@ class AdminCampaignApiTest {
 		CampaignUpdateRequest request = new CampaignUpdateRequest(
 			"제목", "책", "출판사", CampaignCategory.IT, CampaignType.REVIEWER,
 			"https://apply.example.com", null, null,
-			null, LocalDateTime.now().plusDays(7), null, CampaignStatus.OPEN);
+			null, LocalDateTime.now().plusDays(7), null, CampaignStatus.OPEN,
+			null, null, null, null, null, null, null, null);
 
 		// when
 		ResponseEntity<ApiResult<Void>> response = restClient.put()
@@ -265,7 +272,8 @@ class AdminCampaignApiTest {
 		// given - title 공백, deadlineAt null
 		CampaignCreateRequest request = new CampaignCreateRequest(
 			" ", "책", "출판사", CampaignCategory.IT, CampaignType.REVIEWER,
-			"https://apply.example.com", null, null, null, null, null, CampaignStatus.OPEN);
+			"https://apply.example.com", null, null, null, null, null, CampaignStatus.OPEN,
+			null, null, null, null, null, null, null, null, null);
 
 		// when
 		ResponseEntity<ApiResult<List<FieldError>>> response = restClient.post()
@@ -332,7 +340,8 @@ class AdminCampaignApiTest {
 		CampaignUpdateRequest request = new CampaignUpdateRequest(
 			"권한 없는 수정", "책", "출판사", CampaignCategory.IT, CampaignType.REVIEWER,
 			"https://apply.example.com", null, null,
-			null, LocalDateTime.now().plusDays(7), null, CampaignStatus.OPEN);
+			null, LocalDateTime.now().plusDays(7), null, CampaignStatus.OPEN,
+			null, null, null, null, null, null, null, null);
 
 		// when
 		ResponseEntity<ApiResult<Void>> response = restClient.put()
@@ -432,7 +441,10 @@ class AdminCampaignApiTest {
 		return new CampaignCreateRequest(
 			title, "스프링 인 액션", "출판사", CampaignCategory.IT, CampaignType.REVIEWER,
 			"https://apply.example.com", "https://image.example.com/cover.png", "캠페인 설명입니다.",
-			LocalDate.now(), LocalDateTime.now().plusDays(7), LocalDate.now().plusDays(14), status);
+			LocalDate.now(), LocalDateTime.now().plusDays(7), LocalDate.now().plusDays(14), status,
+			10, BookFormat.PAPER, List.of(ReviewChannel.BLOG, ReviewChannel.INSTAGRAM),
+			LocalDate.now().plusDays(21), "블로그 운영 3개월 이상",
+			CampaignSource.MANUAL, null, null, PublishStatus.PUBLISHED);
 	}
 
 	private CampaignResponse create(CampaignCreateRequest request) {

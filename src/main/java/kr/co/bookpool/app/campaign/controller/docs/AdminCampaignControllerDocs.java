@@ -10,7 +10,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.co.bookpool.app.campaign.dto.request.CampaignCreateRequest;
 import kr.co.bookpool.app.campaign.dto.request.CampaignUpdateRequest;
+import kr.co.bookpool.app.campaign.dto.request.PublishStatusUpdateRequest;
+import kr.co.bookpool.app.campaign.dto.request.StatusUpdateRequest;
 import kr.co.bookpool.app.campaign.dto.response.CampaignResponse;
+import kr.co.bookpool.app.campaign.entity.PublishStatus;
 import kr.co.bookpool.common.response.PageResponse;
 import kr.co.bookpool.common.response.ApiResult;
 
@@ -19,10 +22,12 @@ public interface AdminCampaignControllerDocs {
 
 	@Operation(
 		summary = "캠페인 목록 조회 (관리자)",
-		description = "상태와 무관하게 모든 캠페인을 최신 등록순으로 페이징 조회합니다.",
+		description = "최신 등록순으로 페이징 조회합니다. publishStatus로 검수 큐(DRAFT)와 게시된 공고를 나눠 볼 수 있습니다.",
 		security = @SecurityRequirement(name = "bearerAuth"))
 	@ApiResponse(responseCode = "200", description = "조회 성공")
 	ApiResult<PageResponse<CampaignResponse>> list(
+		@Parameter(description = "게시 상태 필터 (DRAFT/PUBLISHED). 생략 시 전부") PublishStatus publishStatus,
+		@Parameter(description = "제목/도서명/출판사 검색어") String query,
 		@Parameter(description = "페이지 번호 (0부터 시작)") int page,
 		@Parameter(description = "페이지 크기") int size
 	);
@@ -67,6 +72,26 @@ public interface AdminCampaignControllerDocs {
 		@ApiResponse(responseCode = "404", description = "캠페인을 찾을 수 없음")
 	})
 	ApiResult<CampaignResponse> update(Long id, CampaignUpdateRequest request);
+
+	@Operation(
+		summary = "게시 상태 변경 (관리자)",
+		description = "검수 대기(DRAFT) ↔ 게시(PUBLISHED)를 전환합니다. 수집된 공고를 검수 후 공개할 때 씁니다.",
+		security = @SecurityRequirement(name = "bearerAuth"))
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "변경 성공"),
+		@ApiResponse(responseCode = "404", description = "캠페인을 찾을 수 없음")
+	})
+	ApiResult<CampaignResponse> changePublishStatus(Long id, PublishStatusUpdateRequest request);
+
+	@Operation(
+		summary = "모집 상태 변경 (관리자)",
+		description = "모집중(OPEN) ↔ 마감(CLOSED)을 수동으로 전환합니다.",
+		security = @SecurityRequirement(name = "bearerAuth"))
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "변경 성공"),
+		@ApiResponse(responseCode = "404", description = "캠페인을 찾을 수 없음")
+	})
+	ApiResult<CampaignResponse> changeStatus(Long id, StatusUpdateRequest request);
 
 	@Operation(
 		summary = "캠페인 삭제 (관리자)",
