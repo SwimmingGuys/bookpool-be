@@ -98,7 +98,11 @@ public class Review extends BaseTimeEntity {
 		return new Review(campaign, member, rating, content, channel, url);
 	}
 
-	/** 본인이 내용을 고치면 다시 확인 대기로 돌아간다. */
+	/**
+	 * 본인이 내용을 고치면 다시 확인 대기로 돌아간다.
+	 * 반려로 가려졌던 후기라면 고친 시점에 다시 노출한다.
+	 * 그러지 않으면 사유대로 고쳐도 영영 가려진 채로 남는다.
+	 */
 	public void update(int rating, String content, ReviewChannel channel, String url) {
 		this.rating = rating;
 		this.content = content;
@@ -106,6 +110,7 @@ public class Review extends BaseTimeEntity {
 		this.url = url;
 		this.submissionStatus = ReviewSubmissionStatus.SUBMITTED;
 		this.rejectReason = null;
+		this.status = ReviewStatus.VISIBLE;
 	}
 
 	public void approve() {
@@ -113,9 +118,15 @@ public class Review extends BaseTimeEntity {
 		this.rejectReason = null;
 	}
 
+	/**
+	 * 반려하면 공개 목록에서도 내린다.
+	 * 공개 조회가 노출 상태만 보도록 바뀌어서, 여기서 가리지 않으면 반려한 후기가
+	 * 그대로 공고에 남는다. 작성자는 마이페이지에서 사유와 함께 계속 볼 수 있다.
+	 */
 	public void reject(String reason) {
 		this.submissionStatus = ReviewSubmissionStatus.REJECTED;
 		this.rejectReason = reason;
+		this.status = ReviewStatus.HIDDEN;
 	}
 
 	public void changeStatus(ReviewStatus status) {

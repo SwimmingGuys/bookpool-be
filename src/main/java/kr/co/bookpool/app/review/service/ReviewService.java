@@ -16,7 +16,6 @@ import kr.co.bookpool.app.review.dto.request.ReviewRequest;
 import kr.co.bookpool.app.review.dto.response.ReviewResponse;
 import kr.co.bookpool.app.review.entity.Review;
 import kr.co.bookpool.app.review.entity.ReviewStatus;
-import kr.co.bookpool.app.review.entity.ReviewSubmissionStatus;
 import kr.co.bookpool.app.review.repository.ReviewRepository;
 import kr.co.bookpool.common.exception.BusinessException;
 import kr.co.bookpool.common.response.PageResponse;
@@ -39,9 +38,14 @@ public class ReviewService {
 	 */
 	public PageResponse<ReviewResponse> listByCampaign(Long campaignId, Long viewerId, int page, int size) {
 		Pageable pageable = pageable(page, size);
+		// 사전 승인 없이 바로 노출한다(사후 검열).
+		// 관리자 승인을 거쳐야만 보이게 두면, 승인하는 사람이 상주하지 않는 한 후기가
+		// 영영 화면에 뜨지 않아 남긴 사람에게도 흔적이 남지 않는다.
+		// 부적절한 후기는 관리자가 status를 HIDDEN으로 내려 가린다.
+		// submissionStatus(확인 대기/인증 완료)는 이제 노출 여부가 아니라,
+		// 서평 원문 링크를 관리자가 확인해 줬는지를 나타내는 표시로만 쓴다.
 		return PageResponse.from(
-			reviewRepository.findAllByCampaignIdAndStatusAndSubmissionStatus(
-					campaignId, ReviewStatus.VISIBLE, ReviewSubmissionStatus.APPROVED, pageable)
+			reviewRepository.findAllByCampaignIdAndStatus(campaignId, ReviewStatus.VISIBLE, pageable)
 				.map(review -> ReviewResponse.of(review, viewerId))
 		);
 	}

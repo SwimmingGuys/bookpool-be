@@ -17,8 +17,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 	String GRAPH = "campaign";
 
 	@EntityGraph(attributePaths = {"campaign", "member"})
-	Page<Review> findAllByCampaignIdAndStatusAndSubmissionStatus(
-		Long campaignId, ReviewStatus status, ReviewSubmissionStatus submissionStatus, Pageable pageable);
+	Page<Review> findAllByCampaignIdAndStatus(Long campaignId, ReviewStatus status, Pageable pageable);
 
 	@EntityGraph(attributePaths = {"campaign", "member"})
 	Page<Review> findAllByMemberId(Long memberId, Pageable pageable);
