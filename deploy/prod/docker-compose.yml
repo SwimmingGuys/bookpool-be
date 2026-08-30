@@ -1,0 +1,152 @@
+# 운영 서버: Ubuntu 단일 박스에 nginx + web(SPA) + app + mysql + redis.
+#
+# dev(deploy/dev)와 다른 점:
+#   - 소스에서 빌드하지 않는다. GHCR에 올라간 이미지를 pull 해서 쓴다.
+#   - SPA도 이미지다. 백엔드와 같은 방식으로 배포·롤백된다.
+#   - 인증서 갱신이 cron으로 자동화돼 있다 (renew-cert.sh).
+#   - SPRING_JPA_HIBERNATE_DDL_AUTO를 주지 않는다.
+#     application-prod.yml이 ddl-auto: none 이므로 스키마는 마이그레이션으로만 바꾼다.
+#
+# 실행: /bookpool 에서  docker compose up -d
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: bookpool-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-bookpool}
+      MYSQL_USER: ${DB_PROD_USERNAME}
+      MYSQL_PASSWORD: ${DB_PROD_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+09:00
+      - --skip-name-resolve
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # 포트를 호스트로 열지 않는다. 외부에서 직접 붙을 수 없다.
+    expose:
+      - "3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - bookpool-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: bookpool-redis
+    restart: unless-stopped
+    # refreshToken·이메일 인증코드가 들어가므로 재시작에도 살아남게 AOF를 켠다.
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks:
+      - bookpool-net
+
+  app:
+    image: ${REGISTRY:-ghcr.io}/${APP_IMAGE_NAME}:${APP_IMAGE_TAG:-latest}
+    container_name: bookpool-app
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: "8080"
+      # application-prod.yml은 ${DB.PROD.URL}처럼 점이 든 이름을 읽는다.
+      # 셸에서 점은 변수명으로 못 쓰므로, .env에는 밑줄 이름으로 담고
+      # 컨테이너에 넣을 때 점 이름으로 바꿔 준다. (상대 바인딩에 기대지 않는다)
+      "DB.PROD.URL": jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-bookpool}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      "DB.PROD.USERNAME": ${DB_PROD_USERNAME}
+      "DB.PROD.PASSWORD": ${DB_PROD_PASSWORD}
+      "DB.PROD.DRIVER_CLASS_NAME": com.mysql.cj.jdbc.Driver
+      "REDIS.HOST": redis
+      "REDIS.PORT": "6379"
+      "JWT.SECRET": ${JWT_SECRET}
+      "MAIL.HOST": ${MAIL_HOST:-smtp.gmail.com}
+      "MAIL.PORT": "${MAIL_PORT:-587}"
+      "MAIL.USERNAME": ${MAIL_USERNAME}
+      "MAIL.PASSWORD": ${MAIL_PASSWORD}
+      "MAIL.FROM": ${MAIL_FROM:-noreply@bookpool.co.kr}
+      "CORS.ALLOWED_ORIGINS": https://${SITE_DOMAIN}
+      "COOKIE.SECURE": "true"
+      "COOKIE.SAME_SITE": Lax
+      "DISCORD.WEBHOOK_URL": ${DISCORD_WEBHOOK_URL:-}
+      "DISCORD.ALERT_ENABLED": "${DISCORD_ALERT_ENABLED:-true}"
+      "UPLOAD.DIRECTORY": /app/uploads
+    volumes:
+      # 표지 이미지는 컨테이너 안에 쓰면 재배포 때 사라진다. 볼륨으로 뺀다.
+      - uploads_data:/app/uploads
+    expose:
+      - "8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    networks:
+      - bookpool-net
+
+  web:
+    image: ${REGISTRY:-ghcr.io}/${WEB_IMAGE_NAME}:${WEB_IMAGE_TAG:-latest}
+    container_name: bookpool-web
+    restart: unless-stopped
+    # 정적 파일만 내려준다. TLS와 /api 라우팅은 앞단 nginx가 맡는다.
+    expose:
+      - "80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - bookpool-net
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: bookpool-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # certbot 발급물. init-cert.sh 로 먼저 받아야 nginx가 뜬다.
+      # named volume 이 아니라 바인드 마운트인 이유: 백업·확인이 쉽고
+      # certbot 컨테이너와 경로를 맞추기 쉽다.
+      - ./certs:/etc/letsencrypt:ro
+      # ACME 챌린지 webroot (갱신용)
+      - ./certbot-www:/var/www/certbot:ro
+    depends_on:
+      - app
+      - web
+    # 헬스체크를 두지 않는다. 진입점이라 죽으면 사이트 전체가 안 뜨므로 바로 드러나고,
+    # 리다이렉트(301)·404를 성공으로 볼지 애매해 항상 통과하는 가짜 체크가 되기 쉽다.
+    # 크래시 시 복구는 restart 정책이 담당한다.
+    networks:
+      - bookpool-net
+
+volumes:
+  mysql_data:
+  redis_data:
+  uploads_data:
+
+networks:
+  bookpool-net:
+    driver: bridge

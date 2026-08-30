@@ -33,6 +33,12 @@ app:
   email-verification:
     code-ttl: 5m
     verified-ttl: 30m
+  # 표지 이미지 업로드. 기본은 로컬 디스크에 저장하고 /uploads로 서빙한다.
+  # 컨테이너 배포에서는 볼륨을 붙이거나 오브젝트 스토리지 구현으로 교체해야 한다.
+  upload:
+    directory: ${UPLOAD.DIRECTORY:uploads}
+    public-path: /uploads
+    max-size-bytes: 5242880
 
 # Discord 알림: 4xx/5xx 에러 응답을 웹훅으로 전달한다.
 # webhook-url은 민감 정보이므로 환경변수/secret으로 주입한다. alert.enabled는 환경별로 명시적으로 켠다.

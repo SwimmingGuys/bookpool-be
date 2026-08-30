@@ -94,5 +94,10 @@ public class Member extends BaseTimeEntity {
 	public void changePassword(String encodedPassword) {
 		this.password = encodedPassword;
 	}
+
+	/** 모집 소식 이메일 수신 동의. 가입 후에도 마이페이지에서 켜고 끌 수 있다. */
+	public void changeEmailSubscription(boolean emailSubscribed) {
+		this.emailSubscribed = emailSubscribed;
+	}
 }
 

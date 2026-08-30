@@ -1,11 +1,15 @@
 package kr.co.bookpool.app.campaign.dto.response;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Locale;
 
 import kr.co.bookpool.app.campaign.entity.Campaign;
 import kr.co.bookpool.app.campaign.entity.CampaignStatus;
 import kr.co.bookpool.app.campaign.entity.CampaignType;
+import kr.co.bookpool.app.campaign.entity.ReviewChannel;
 
 public record CampaignResponse(
 	String id,
@@ -21,7 +25,21 @@ public record CampaignResponse(
 	LocalDate recruitEndDate,
 	LocalDate announcementDate,
 	String coverImage,
-	String description
+	String description,
+	String applyUrl,
+
+	// 모집 조건
+	Integer capacity,
+	String bookFormat,
+	List<String> reviewChannels,
+	LocalDate reviewDueDate,
+	String requirements,
+
+	// 수집 출처
+	String source,
+	String sourceUrl,
+	LocalDateTime collectedAt,
+	String publishStatus
 ) {
 
 	public static CampaignResponse from(Campaign campaign) {
@@ -35,14 +53,26 @@ public record CampaignResponse(
 			campaign.getTitle(),
 			campaign.getBookTitle(),
 			campaign.getPublisherName(),
-			toCategoryLabel(campaign.getCategory().name()),
+			// 라벨이 아니라 enum 이름을 내려준다. 라벨은 표시용이라 바뀔 수 있고,
+			// 프론트가 필터 쿼리에 그대로 되돌려 보내는 값이기도 하다.
+			campaign.getCategory().name(),
 			campaign.getViewCount() == null ? 0 : campaign.getViewCount(),
 			status,
 			campaign.getRecruitStartDate(),
 			campaign.getDeadlineAt().toLocalDate(),
 			campaign.getAnnouncementDate(),
 			campaign.getImageUrl(),
-			campaign.getDescription()
+			campaign.getDescription(),
+			campaign.getApplyUrl(),
+			campaign.getCapacity(),
+			campaign.getBookFormat() == null ? null : campaign.getBookFormat().name(),
+			toChannelNames(campaign.getReviewChannels()),
+			campaign.getReviewDueDate(),
+			campaign.getRequirements(),
+			campaign.getSource().name(),
+			campaign.getSourceUrl(),
+			campaign.getCollectedAt(),
+			campaign.getPublishStatus().name()
 		);
 	}
 
@@ -50,15 +80,10 @@ public record CampaignResponse(
 		return type == CampaignType.REVIEWER ? "Reviewer" : "Beta Reader";
 	}
 
-	private static String toCategoryLabel(String enumName) {
-		return switch (enumName) {
-			case "IT" -> "IT/개발";
-			case "ECONOMY" -> "경제";
-			case "NOVEL" -> "소설";
-			case "ESSAY" -> "에세이";
-			case "HUMANITY" -> "인문/사회";
-			case "SCIENCE" -> "예술/디자인";
-			default -> "기타";
-		};
+	private static List<String> toChannelNames(List<ReviewChannel> channels) {
+		if (channels == null) return List.of();
+		return channels.stream()
+			.map(channel -> channel.name().toUpperCase(Locale.ROOT))
+			.toList();
 	}
 }

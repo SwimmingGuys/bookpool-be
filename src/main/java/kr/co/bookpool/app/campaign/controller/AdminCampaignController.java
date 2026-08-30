@@ -5,6 +5,7 @@ import static org.springframework.http.HttpStatus.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +18,10 @@ import jakarta.validation.Valid;
 import kr.co.bookpool.app.campaign.controller.docs.AdminCampaignControllerDocs;
 import kr.co.bookpool.app.campaign.dto.request.CampaignCreateRequest;
 import kr.co.bookpool.app.campaign.dto.request.CampaignUpdateRequest;
+import kr.co.bookpool.app.campaign.dto.request.PublishStatusUpdateRequest;
+import kr.co.bookpool.app.campaign.dto.request.StatusUpdateRequest;
 import kr.co.bookpool.app.campaign.dto.response.CampaignResponse;
+import kr.co.bookpool.app.campaign.entity.PublishStatus;
 import kr.co.bookpool.common.response.PageResponse;
 import kr.co.bookpool.app.campaign.service.AdminCampaignService;
 import kr.co.bookpool.common.response.ApiResult;
@@ -34,10 +38,12 @@ public class AdminCampaignController implements AdminCampaignControllerDocs {
 	@ResponseStatus(OK)
 	@GetMapping
 	public ApiResult<PageResponse<CampaignResponse>> list(
+		@RequestParam(required = false) PublishStatus publishStatus,
+		@RequestParam(required = false) String query,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "20") int size
 	) {
-		return ApiResult.success(adminCampaignService.list(page, size));
+		return ApiResult.success(adminCampaignService.list(publishStatus, query, page, size));
 	}
 
 	@Override
@@ -62,6 +68,26 @@ public class AdminCampaignController implements AdminCampaignControllerDocs {
 		@Valid @RequestBody CampaignUpdateRequest request
 	) {
 		return ApiResult.success(adminCampaignService.update(id, request));
+	}
+
+	@Override
+	@ResponseStatus(OK)
+	@PatchMapping("/{id}/publish-status")
+	public ApiResult<CampaignResponse> changePublishStatus(
+		@PathVariable Long id,
+		@Valid @RequestBody PublishStatusUpdateRequest request
+	) {
+		return ApiResult.success(adminCampaignService.changePublishStatus(id, request.publishStatus()));
+	}
+
+	@Override
+	@ResponseStatus(OK)
+	@PatchMapping("/{id}/status")
+	public ApiResult<CampaignResponse> changeStatus(
+		@PathVariable Long id,
+		@Valid @RequestBody StatusUpdateRequest request
+	) {
+		return ApiResult.success(adminCampaignService.changeStatus(id, request.status()));
 	}
 
 	@Override
